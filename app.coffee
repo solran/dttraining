@@ -3,6 +3,7 @@ class Stimulus
     @key = key.toUpperCase()
 
   clone: ->
+    # create a new clone!
     new Stimulus(@type, @key)
 
 class StimulusView
