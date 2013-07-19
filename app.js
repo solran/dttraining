@@ -37,6 +37,10 @@
       this.time = null;
     }
 
+    Attempt.prototype.completed = function() {
+      return this.response;
+    };
+
     return Attempt;
 
   })();
@@ -52,10 +56,13 @@
       $(window).on('keydown', function(event) {
         var key;
         key = String.fromCharCode(event.which);
-        if (__indexOf.call(_this.trial.keys, key) >= 0) {
-          if (key === stim.key) {
+        if (__indexOf.call(_this.attempt.trial.keys, key) >= 0) {
+          _this.attempt.response = key;
+          if (key === _this.attempt.stimulus.key) {
+            _this.attempt.success = true;
             return _this.elem.html('Success');
           } else {
+            _this.attempt.success = false;
             return _this.elem.html('BOOOHHH!');
           }
         }
@@ -86,17 +93,31 @@
       n = arguments[0], trials = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
       this.n = n;
       this.trials = trials;
-      this.attempts = [];
+      this.collection = [];
       for (n = _i = 0, _ref = this.n; 0 <= _ref ? _i < _ref : _i > _ref; n = 0 <= _ref ? ++_i : --_i) {
-        this.attempts[n] = [];
+        this.collection[n] = [];
         _ref1 = this.trials;
         for (_j = 0, _len = _ref1.length; _j < _len; _j++) {
           trial = _ref1[_j];
-          this.attempts[n].push(new Attempt(trial));
+          this.collection[n].push(new Attempt(trial));
         }
       }
-      console.log(this.attempts);
     }
+
+    Block.prototype.completed = function() {
+      var attempt, attempts, _i, _j, _len, _len1, _ref;
+      _ref = this.collection;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        attempts = _ref[_i];
+        for (_j = 0, _len1 = attempts.length; _j < _len1; _j++) {
+          attempt = attempts[_j];
+          if (!attempt.completed()) {
+            return false;
+          }
+        }
+      }
+      return true;
+    };
 
     return Block;
 
@@ -133,7 +154,7 @@
 
     BlockView.prototype.showTrial = function() {
       var attempt, view, _i, _len, _ref;
-      _ref = this.block.attempts[this.curr];
+      _ref = this.block.collection[this.curr];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         attempt = _ref[_i];
         view = new AttemptView(attempt);
@@ -146,7 +167,7 @@
 
   })();
 
-  block = new Block(10, new Trial(new Stimulus('square', 'j'), new Stimulus('circle', 'k')), new Trial(new Stimulus('sun', 's'), new Stimulus('moon', 'd')));
+  block = new Block(2, new Trial(new Stimulus('square', 'j'), new Stimulus('circle', 'k')), new Trial(new Stimulus('sun', 's'), new Stimulus('moon', 'd')));
 
   new BlockView(block).elem.appendTo($('body'));
 

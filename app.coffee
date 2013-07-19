@@ -16,6 +16,9 @@ class Attempt
     @response = null
     @time     = null
 
+  completed: ->
+    @response
+
 class AttemptView
   constructor: (@attempt) ->
     @elem = $('<div>').addClass('attempt')
@@ -25,10 +28,14 @@ class AttemptView
     $(window).on 'keydown', (event) =>
       key = String.fromCharCode(event.which)
       
-      if key in @trial.keys
-        if key == stim.key
+      if key in @attempt.trial.keys
+        @attempt.response = key
+
+        if key == @attempt.stimulus.key
+          @attempt.success = true
           @elem.html('Success')
         else
+          @attempt.success = false
           @elem.html('BOOOHHH!')
 
 class Trial
@@ -37,15 +44,20 @@ class Trial
 
 class Block
   constructor: (@n, @trials...) ->
-    @attempts = []
+    @collection = []
 
     for n in [0...@n]
-      @attempts[n] = []
+      @collection[n] = []
 
       for trial in @trials
-        @attempts[n].push(new Attempt(trial))
+        @collection[n].push(new Attempt(trial))
 
-    console.log @attempts
+  completed: ->
+    for attempts in @collection
+      for attempt in attempts
+        return false unless attempt.completed()
+
+    true
 
 class BlockView
   @loadingTime = 200
@@ -73,14 +85,14 @@ class BlockView
       console.log 'End!'
 
   showTrial: ->
-    for attempt in @block.attempts[@curr]
+    for attempt in @block.collection[@curr]
       view = new AttemptView(attempt)
       @elem.append(view.elem)
 
     @curr++
 
 block = new Block(
-  10,
+  2,
   new Trial(
     new Stimulus('square', 'j'),
     new Stimulus('circle', 'k')
