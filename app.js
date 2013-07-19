@@ -114,7 +114,8 @@
         attempts = _ref[_i];
         for (_j = 0, _len1 = attempts.length; _j < _len1; _j++) {
           attempt = attempts[_j];
-          if (!attempt.completed()) {
+          console.log(attempt.response);
+          if (attempt.response === null) {
             return false;
           }
         }
@@ -136,8 +137,12 @@
       this.block = block;
       this.elem = $('<div>').addClass('block');
       this.curr = 0;
+      this.next();
       $(window).on('click', function(event) {
-        return _this.next();
+        console.log(_this.block.completed());
+        if (_this.block.completed()) {
+          return _this.next();
+        }
       });
     }
 
