@@ -19,6 +19,10 @@ class Attempt
   completed: ->
     @response
 
+  answer: (key) ->
+    @response = key
+    @success  = @stimulus.key == key
+
 class AttemptView
   constructor: (@attempt) ->
     @elem = $('<div>').addClass('attempt')
@@ -29,13 +33,11 @@ class AttemptView
       key = String.fromCharCode(event.which)
       
       if key in @attempt.trial.keys
-        @attempt.response = key
+        @attempt.answer(key)
 
-        if key == @attempt.stimulus.key
-          @attempt.success = true
+        if @attempt.success
           @elem.html('Success')
         else
-          @attempt.success = false
           @elem.html('BOOOHHH!')
 
 class Trial

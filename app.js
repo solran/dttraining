@@ -41,6 +41,11 @@
       return this.response;
     };
 
+    Attempt.prototype.answer = function(key) {
+      this.response = key;
+      return this.success = this.stimulus.key === key;
+    };
+
     return Attempt;
 
   })();
@@ -57,12 +62,10 @@
         var key;
         key = String.fromCharCode(event.which);
         if (__indexOf.call(_this.attempt.trial.keys, key) >= 0) {
-          _this.attempt.response = key;
-          if (key === _this.attempt.stimulus.key) {
-            _this.attempt.success = true;
+          _this.attempt.answer(key);
+          if (_this.attempt.success) {
             return _this.elem.html('Success');
           } else {
-            _this.attempt.success = false;
             return _this.elem.html('BOOOHHH!');
           }
         }
