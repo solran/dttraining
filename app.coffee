@@ -3,7 +3,6 @@ class Stimulus
     @key = key.toUpperCase()
 
   clone: ->
-    #minions dominations!
     new Stimulus(@type, @key)
 
 class StimulusView
@@ -19,7 +18,7 @@ class TrialView
     @elem = $('<div>').addClass('trial')
     stim = @trial.stimuli[Math.floor(Math.random() * @trial.stimuli.length)].clone()
     view = new StimulusView(stim)
-    @elem.html(view.html)
+    @elem.html(view.elem)
 
     $(window).on 'keydown', (event) =>
       key = String.fromCharCode(event.which)
@@ -61,7 +60,7 @@ class BlockView
   showTrial: ->
     for t in @block.trials
       view = new TrialView(t)
-      @elem.append(view.html)
+      @elem.append(view.elem)
 
 block = new Block(
   10,
@@ -75,4 +74,4 @@ block = new Block(
   )
 )
 
-new BlockView(block).html.appendTo($('body'))
+new BlockView(block).elem.appendTo($('body'))

@@ -50,7 +50,7 @@
       this.elem = $('<div>').addClass('trial');
       stim = this.trial.stimuli[Math.floor(Math.random() * this.trial.stimuli.length)].clone();
       view = new StimulusView(stim);
-      this.elem.html(view.html);
+      this.elem.html(view.elem);
       $(window).on('keydown', function(event) {
         var key;
         key = String.fromCharCode(event.which);
@@ -116,7 +116,7 @@
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         t = _ref[_i];
         view = new TrialView(t);
-        _results.push(this.elem.append(view.html));
+        _results.push(this.elem.append(view.elem));
       }
       return _results;
     };
@@ -127,6 +127,6 @@
 
   block = new Block(10, new Trial(new Stimulus('square', 'j'), new Stimulus('circle', 'k')), new Trial(new Stimulus('sun', 's'), new Stimulus('moon', 'd')));
 
-  new BlockView(block).html.appendTo($('body'));
+  new BlockView(block).elem.appendTo($('body'));
 
 }).call(this);
