@@ -9,15 +9,17 @@ class StimulusView
   constructor: (@stimulus) ->
     @elem = $('<div>').addClass('stimulus').addClass(@stimulus.type)
 
-class Trial
-  constructor: (@stimuli...) ->
-    @keys = @stimuli.map (stimulus) -> stimulus.key
-
-class TrialView
+class Attempt
   constructor: (@trial) ->
-    @elem = $('<div>').addClass('trial')
-    stim = @trial.stimuli[Math.floor(Math.random() * @trial.stimuli.length)].clone()
-    view = new StimulusView(stim)
+    @stimulus = @trial.stimuli[Math.floor(Math.random() * @trial.stimuli.length)]
+    @success  = null
+    @response = null
+    @time     = null
+
+class AttemptView
+  constructor: (@attempt) ->
+    @elem = $('<div>').addClass('attempt')
+    view = new StimulusView(@attempt.stimulus)
     @elem.html(view.elem)
 
     $(window).on 'keydown', (event) =>
@@ -29,12 +31,25 @@ class TrialView
         else
           @elem.html('BOOOHHH!')
 
+class Trial
+  constructor: (@stimuli...) ->
+    @keys = @stimuli.map (stimulus) -> stimulus.key
+
 class Block
   constructor: (@n, @trials...) ->
+    @attempts = []
+
+    for n in [0...@n]
+      @attempts[n] = []
+
+      for trial in @trials
+        @attempts[n].push(new Attempt(trial))
+
+    console.log @attempts
 
 class BlockView
-  @loadingTime = 2000
-  @loadingIcon = '<u>*</u>'
+  @loadingTime = 200
+  @loadingIcon = '*'
 
   constructor: (@block) ->
     @elem = $('<div>').addClass('block')
@@ -44,7 +59,7 @@ class BlockView
       @next()
 
   next: ->
-    if @curr++ < @block.n
+    if @curr < @block.n
       @elem.html(BlockView.loadingIcon)
 
       $(window).off 'keydown'
@@ -58,9 +73,11 @@ class BlockView
       console.log 'End!'
 
   showTrial: ->
-    for t in @block.trials
-      view = new TrialView(t)
+    for attempt in @block.attempts[@curr]
+      view = new AttemptView(attempt)
       @elem.append(view.elem)
+
+    @curr++
 
 block = new Block(
   10,
