@@ -5,8 +5,6 @@ class Stimulus
   clone: ->
     new Stimulus(@type, @key)
 
-#blha blha blhah
-
 class StimulusView
   constructor: (@stimulus) ->
     @elem = $('<div>').addClass('stimulus').addClass(@stimulus.type)
@@ -59,8 +57,7 @@ class Block
   completed: ->
     for attempts in @collection
       for attempt in attempts
-        console.log attempt.response
-        return false unless attempt.response != null 
+        return false unless attempt.completed()
 
     true
 
@@ -71,15 +68,9 @@ class BlockView
   constructor: (@block) ->
     @elem = $('<div>').addClass('block')
     @curr = 0
-    @next()
-    
- 
-    $(window).on 'click', (event) =>
-      console.log @block.completed()
-      if @block.completed()
 
-        @next()
-     # @next()
+    $(window).on 'click', (event) =>
+      @next()
 
   next: ->
     if @curr < @block.n
