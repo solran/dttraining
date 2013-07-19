@@ -21,7 +21,7 @@
   StimulusView = (function() {
     function StimulusView(stimulus) {
       this.stimulus = stimulus;
-      this.html = $('<div>').addClass('stimulus').addClass(this.stimulus.type);
+      this.elem = $('<div>').addClass('stimulus').addClass(this.stimulus.type);
     }
 
     return StimulusView;
@@ -47,18 +47,18 @@
       var stim, view,
         _this = this;
       this.trial = trial;
-      this.html = $('<div>').addClass('trial');
+      this.elem = $('<div>').addClass('trial');
       stim = this.trial.stimuli[Math.floor(Math.random() * this.trial.stimuli.length)].clone();
       view = new StimulusView(stim);
-      this.html.html(view.html);
+      this.elem.html(view.html);
       $(window).on('keydown', function(event) {
         var key;
         key = String.fromCharCode(event.which);
         if (__indexOf.call(_this.trial.keys, key) >= 0) {
           if (key === stim.key) {
-            return _this.html.html('Success');
+            return _this.elem.html('Success');
           } else {
-            return _this.html.html('BOOOHHH!');
+            return _this.elem.html('BOOOHHH!');
           }
         }
       });
@@ -81,14 +81,14 @@
   })();
 
   BlockView = (function() {
-    BlockView.loadingTime = 200;
+    BlockView.loadingTime = 2000;
 
-    BlockView.loadingIcon = '*';
+    BlockView.loadingIcon = '<u>*</u>';
 
     function BlockView(block) {
       var _this = this;
       this.block = block;
-      this.html = $('<div>').addClass('block');
+      this.elem = $('<div>').addClass('block');
       this.curr = 0;
       $(window).on('click', function(event) {
         return _this.next();
@@ -98,10 +98,10 @@
     BlockView.prototype.next = function() {
       var _this = this;
       if (this.curr++ < this.block.n) {
-        this.html.html(BlockView.loadingIcon);
+        this.elem.html(BlockView.loadingIcon);
         $(window).off('keydown');
         return setTimeout(function() {
-          _this.html.html('');
+          _this.elem.html('');
           return _this.showTrial();
         }, BlockView.loadingTime);
       } else {
@@ -116,7 +116,7 @@
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         t = _ref[_i];
         view = new TrialView(t);
-        _results.push(this.html.append(view.html));
+        _results.push(this.elem.append(view.html));
       }
       return _results;
     };
