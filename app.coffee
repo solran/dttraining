@@ -89,13 +89,11 @@ class Block
 class BlockView
   @loadingTime = 200
   @loadingIcon = '*'
-  @welcome     = new Instruction("Bienvenue dans le programme!")
-  @bye         = new Instruction("Fin de bloc")
-
+  
   constructor: (@block) ->
     @elem = $('<div>').addClass('block')
     @curr = -1
-    @start()
+    @next()
 
     $(window).on 'click', (event) =>
       if @completed()
@@ -106,10 +104,10 @@ class BlockView
       return false unless attempt.completed()
 
     true
-  start: ->
+  #start: ->
     #debugger
-    @elem.html(BlockView.welcome.text)
-    @next()
+    #@elem.html(BlockView.welcome.text)
+    #@next()
 
   next: ->
     $(window).off 'keydown'
@@ -124,8 +122,7 @@ class BlockView
 
     else
       $(window).off 'click'
-      #trigger
-      console.log 'End!'
+      EventManager.trigger @, "completed"
 
   showTrial: ->
     for attempt in @block.collection[@curr]
@@ -165,6 +162,8 @@ block = new Block(
   )
 )
 
-instruction = new Instruction("Bonjour pipi!")
+@sessionStart     = new Instruction("Bienvenue dans le programme!")
+@blockEnd         = new Instruction("Fin de bloc")
+@sessionEnd         = new Instruction("Fin de Session")
 
-new App(instruction, block, instruction, instruction).next()
+new App(sessionStart, block, blockEnd).next()
