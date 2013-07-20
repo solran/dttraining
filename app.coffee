@@ -1,5 +1,5 @@
 class Instruction
-  constructor: (@text) ->
+  constructor: (@text, @timeout = 1000) ->
 
 class InstructionView
   constructor: (@instruction) ->
@@ -7,7 +7,7 @@ class InstructionView
 
     setTimeout =>
       $(@).trigger "instruction.completed"
-    , 1000
+    , @instruction.timeout
 
 class Stimulus
   constructor: (@type, key) ->
@@ -76,8 +76,7 @@ class Block
     true
 
 class BlockView
-  @loadingTime = 200
-  @loadingIcon = '*'
+  @loadingIcon = new Instruction("*", 200)
   
   constructor: (@block) ->
     @elem = $('<div>').addClass('block')
@@ -106,19 +105,17 @@ class BlockView
     $(window).off 'keydown'
 
     if @curr < @block.n
-      @elem.html(BlockView.loadingIcon)
-
-      setTimeout => 
-        @elem.html('')
-        @showTrial(@curr)
-      , BlockView.loadingTime
+      view = new InstructionView(BlockView.loadingIcon)
+      $(view).on 'instruction.completed', @show
+      @elem.html(view.elem)
 
     else
       $(window).off 'click'
       $(@).trigger "block.completed"
 
-  showTrial: (n) ->
-    for attempt in @block.collection[n]
+  show: =>
+    @elem.html('')
+    for attempt in @block.collection[@curr]
       view = new AttemptView(attempt)
       @elem.append(view.elem)
 
