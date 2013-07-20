@@ -19,14 +19,16 @@ class InstructionView
   constructor: (@instruction) ->
     @elem = $('<div>').addClass('instruction').html(@instruction.text)
 
-    setTimeout =>
+    $(window).on 'click', (event) =>
+      console.log "Tata"
+      $(window).off 'click'
       EventManager.trigger @, "completed"
-    , 1000
 
 class Stimulus
   constructor: (@type, key) ->
     @key = key.toUpperCase()
 
+  # clone n'est pas utilisé
   clone: ->
     new Stimulus(@type, @key)
 
@@ -142,6 +144,7 @@ class App
     if action instanceof Instruction
       view = new InstructionView(action)
       $("body").html(view.elem)
+
     else if action instanceof Block
       view = new BlockView(action)
       $("body").html(view.elem)
@@ -166,4 +169,4 @@ block = new Block(
 @blockEnd         = new Instruction("Fin de bloc")
 @sessionEnd         = new Instruction("Fin de Session")
 
-new App(sessionStart, block, blockEnd).next()
+new App(sessionStart, block, blockEnd, block).next()
