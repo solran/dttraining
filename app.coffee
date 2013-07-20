@@ -1,17 +1,3 @@
-class EventManager
-  @events = {}
-
-  @trigger: (instance, event) ->
-    if @events[instance]
-      if @events[instance][event]
-        for callback in @events[instance][event]
-          callback()
-
-  @on: (instance, event, callback) ->
-    @events[instance] ?= {}
-    @events[instance][event] ?= []
-    @events[instance][event].push callback
-
 class Instruction
   constructor: (@text) ->
 
@@ -19,10 +5,9 @@ class InstructionView
   constructor: (@instruction) ->
     @elem = $('<div>').addClass('instruction').html(@instruction.text)
 
-    $(window).on 'click', (event) =>
-      console.log "Tata"
-      $(window).off 'click'
-      EventManager.trigger @, "completed"
+    setTimeout =>
+      $(@).trigger "instruction.completed"
+    , 1000
 
 class Stimulus
   constructor: (@type, key) ->
@@ -74,7 +59,7 @@ class Trial
     @keys = @stimuli.map (stimulus) -> stimulus.key
 
 class Block
-  constructor: (@n, @trials...) ->
+  constructor: (@id, @n, @trials...) ->
     @collection = []
 
     for n in [0...@n]
@@ -96,11 +81,14 @@ class BlockView
   
   constructor: (@block) ->
     @elem = $('<div>').addClass('block')
-    @curr = -1
-    @next()
+    @inst = new Instruction("Welcome to #{@block.id}!")
+    @curr = 0
+    
+    @start()
 
     $(window).on 'click', (event) =>
       if @completed()
+        @curr++
         @next()
   
   completed: ->
@@ -108,55 +96,55 @@ class BlockView
       return false unless attempt.completed()
 
     true
-  #start: ->
-    #debugger
-    #@elem.html(BlockView.welcome.text)
-    #@next()
 
-  next: ->
+  start: =>
+    view = new InstructionView(@inst)
+    $(view).on "instruction.completed", @next
+    @elem.html(view.elem)
+
+  next: =>
     $(window).off 'keydown'
 
-    if ++@curr < @block.n
+    if @curr < @block.n
       @elem.html(BlockView.loadingIcon)
 
       setTimeout => 
         @elem.html('')
-        @showTrial()
+        @showTrial(@curr)
       , BlockView.loadingTime
 
     else
       $(window).off 'click'
-      EventManager.trigger @, "completed"
+      $(@).trigger "block.completed"
 
-  showTrial: ->
-    for attempt in @block.collection[@curr]
+  showTrial: (n) ->
+    for attempt in @block.collection[n]
       view = new AttemptView(attempt)
       @elem.append(view.elem)
       attempt.timeOn = Date.now()
 
 
 class App
-  constructor: (@actions...) ->
+  constructor: (@blocks...) ->
     @curr = 0
 
   next: ->
-    action = @actions[@curr]
-
-    EventManager.on action, "completed", @switch
-    
-    if action instanceof Instruction
-      view = new InstructionView(action)
+    if block = @blocks[@curr]
+      view = new BlockView(block)
       $("body").html(view.elem)
-
-    else if action instanceof Block
-      view = new BlockView(action)
-      $("body").html(view.elem)
+      $(view).on "block.completed", @switch
+    else
+      console.log "app.completed"
 
   switch: =>
     @curr++
     @next()
 
-block = new Block(
+
+
+# program configuration
+block1 = new Block(
+  "Block1",
   2,
   new Trial(
     new Stimulus('square', 'j'),
@@ -168,8 +156,17 @@ block = new Block(
   )
 )
 
-@sessionStart     = new Instruction("Bienvenue dans le programme!")
-@blockEnd         = new Instruction("Fin de bloc")
-@sessionEnd         = new Instruction("Fin de Session")
+block2 = new Block(
+  "Block2",
+  2,
+  new Trial(
+    new Stimulus('square', 'j'),
+    new Stimulus('circle', 'k')
+  ),
+  new Trial(
+    new Stimulus('sun', 's'),
+    new Stimulus('moon', 'd')
+  )
+)
 
-new App(sessionStart, block, blockEnd, block).next()
+new App(block1, block2).next()
