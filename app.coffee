@@ -68,6 +68,7 @@ class BlockView
   constructor: (@block) ->
     @elem = $('<div>').addClass('block')
     @curr = -1
+    @next()
 
     $(window).on 'click', (event) =>
       if @completed()
