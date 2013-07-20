@@ -41,7 +41,8 @@ class Attempt
     @stimulus = @trial.stimuli[Math.floor(Math.random() * @trial.stimuli.length)]
     @success  = null
     @response = null
-    @time     = null
+    @timeOn   = null
+    @reactionTime = null
 
   completed: ->
     !!@response
@@ -49,6 +50,7 @@ class Attempt
   answer: (key) ->
     @response = key
     @success  = @stimulus.key == key
+    @reactionTime = Date.now()-@timeOn
 
 class AttemptView
   constructor: (@attempt) ->
@@ -130,6 +132,7 @@ class BlockView
     for attempt in @block.collection[@curr]
       view = new AttemptView(attempt)
       @elem.append(view.elem)
+      attempt.timeOn = Date.now()
 
 
 class App
