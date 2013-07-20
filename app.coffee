@@ -17,7 +17,7 @@ class Attempt
     @time     = null
 
   completed: ->
-    @response
+    !!@response
 
   answer: (key) ->
     @response = key
@@ -67,13 +67,20 @@ class BlockView
 
   constructor: (@block) ->
     @elem = $('<div>').addClass('block')
-    @curr = 0
+    @curr = -1
 
     $(window).on 'click', (event) =>
-      @next()
+      if @completed()
+        @next()
+  
+  completed: ->
+    for attempt in @block.collection[@curr]
+      return false unless attempt.completed()
+
+    true
 
   next: ->
-    if @curr < @block.n
+    if @curr++ < @block.n
       @elem.html(BlockView.loadingIcon)
 
       $(window).off 'keydown'
