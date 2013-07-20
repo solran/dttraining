@@ -81,25 +81,24 @@ class BlockView
     true
 
   next: ->
-    if @curr++ < @block.n
+    $(window).off 'keydown'
+
+    if ++@curr < @block.n
       @elem.html(BlockView.loadingIcon)
 
-      $(window).off 'keydown'
-      
       setTimeout => 
         @elem.html('')
         @showTrial()
       , BlockView.loadingTime
 
     else
+      $(window).off 'click'
       console.log 'End!'
 
   showTrial: ->
     for attempt in @block.collection[@curr]
       view = new AttemptView(attempt)
       @elem.append(view.elem)
-
-    @curr++
 
 block = new Block(
   2,
