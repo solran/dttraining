@@ -13,10 +13,6 @@ class Stimulus
   constructor: (@type, key) ->
     @key = key.toUpperCase()
 
-  # clone n'est pas utilisé
-  clone: ->
-    new Stimulus(@type, @key)
-
 class StimulusView
   constructor: (@stimulus) ->
     @elem = $('<div>').addClass('stimulus').addClass(@stimulus.type)
