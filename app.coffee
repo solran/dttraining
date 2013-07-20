@@ -19,25 +19,29 @@ class StimulusView
 
 class Attempt
   constructor: (@trial) ->
-    @stimulus = @trial.stimuli[Math.floor(Math.random() * @trial.stimuli.length)]
-    @success  = null
-    @response = null
-    @timeOn   = null
-    @reactionTime = null
+    @stimulus   = @trial.stimuli[Math.floor(Math.random() * @trial.stimuli.length)]
+    @success    = null
+    @response   = null
+    @startedOn  = null
+    @answeredOn = null
 
   completed: ->
     !!@response
 
+  reactionTime: ->
+    @answeredOn - @startedOn
+
   answer: (key) ->
-    @response = key
-    @success  = @stimulus.key == key
-    @reactionTime = Date.now()-@timeOn
+    @response   = key
+    @success    = @stimulus.key == key
+    @answeredOn = Date.now()
 
 class AttemptView
   constructor: (@attempt) ->
     @elem = $('<div>').addClass('attempt')
     view = new StimulusView(@attempt.stimulus)
     @elem.html(view.elem)
+    @attempt.startedOn = Date.now()
 
     $(window).on 'keydown', (event) =>
       key = String.fromCharCode(event.which)
@@ -117,8 +121,6 @@ class BlockView
     for attempt in @block.collection[n]
       view = new AttemptView(attempt)
       @elem.append(view.elem)
-      attempt.timeOn = Date.now()
-
 
 class App
   constructor: (@blocks...) ->
