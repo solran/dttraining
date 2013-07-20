@@ -1,38 +1,37 @@
-.square {
+.instruction {
+  font-size: 24px;
+  text-align: center;
+  padding: 12px;
+}
+
+.attempt {
+  float: left;
+  text-align: center;
+}
+
+.stimulus {
   display: block;
   margin-left: auto;
   margin-right: auto;
   width: 100px;
   height: 100px;
+}
+
+.square {
   border: 1px solid #000000;
 }
 
-.circle {;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  width: 100px;
-  height: 100px;
+.circle {
   border: 1px solid #000000;
   border-radius: 50px;
 }
 
-.sun {;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  width: 100px;
-  height: 100px;
+.sun {
   background-color: red;
   border-radius: 50px;
 }
 
-.moon {;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  width: 100px;
-  height: 100px;
+.moon {
   background-color: blue;
   border-radius: 50px;
 }

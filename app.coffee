@@ -38,7 +38,7 @@ class Attempt
 
 class AttemptView
   constructor: (@attempt) ->
-    @elem = $('<div>').addClass('attempt')
+    @elem = $('<div>').addClass('attempt').css('width', 100 / @attempt.trial.stimuli.length + '%')
     view = new StimulusView(@attempt.stimulus)
     @elem.html(view.elem)
     @attempt.startedOn = Date.now()
