@@ -1,3 +1,28 @@
+class EventManager
+  @events = {}
+
+  @trigger: (instance, event) ->
+    if @events[instance]
+      if @events[instance][event]
+        for callback in @events[instance][event]
+          callback()
+
+  @on: (instance, event, callback) ->
+    @events[instance] ?= {}
+    @events[instance][event] ?= []
+    @events[instance][event].push callback
+
+class Instruction
+  constructor: (@text) ->
+
+class InstructionView
+  constructor: (@instruction) ->
+    @elem = $('<div>').addClass('instruction').html(@instruction.text)
+
+    setTimeout =>
+      EventManager.trigger @, "completed"
+    , 1000
+
 class Stimulus
   constructor: (@type, key) ->
     @key = key.toUpperCase()
@@ -64,11 +89,13 @@ class Block
 class BlockView
   @loadingTime = 200
   @loadingIcon = '*'
+  @welcome     = new Instruction("Bienvenue dans le programme!")
+  @bye         = new Instruction("Fin de bloc")
 
   constructor: (@block) ->
     @elem = $('<div>').addClass('block')
     @curr = -1
-    @next()
+    @start()
 
     $(window).on 'click', (event) =>
       if @completed()
@@ -79,6 +106,10 @@ class BlockView
       return false unless attempt.completed()
 
     true
+  start: ->
+    #debugger
+    @elem.html(BlockView.welcome.text)
+    @next()
 
   next: ->
     $(window).off 'keydown'
@@ -93,12 +124,34 @@ class BlockView
 
     else
       $(window).off 'click'
+      #trigger
       console.log 'End!'
 
   showTrial: ->
     for attempt in @block.collection[@curr]
       view = new AttemptView(attempt)
       @elem.append(view.elem)
+
+
+class App
+  constructor: (@actions...) ->
+    @curr = 0
+
+  next: ->
+    action = @actions[@curr]
+
+    EventManager.on action, "completed", @switch
+    
+    if action instanceof Instruction
+      view = new InstructionView(action)
+      $("body").html(view.elem)
+    else if action instanceof Block
+      view = new BlockView(action)
+      $("body").html(view.elem)
+
+  switch: =>
+    @curr++
+    @next()
 
 block = new Block(
   2,
@@ -112,4 +165,6 @@ block = new Block(
   )
 )
 
-new BlockView(block).elem.appendTo($('body'))
+instruction = new Instruction("Bonjour pipi!")
+
+new App(instruction, block, instruction, instruction).next()
