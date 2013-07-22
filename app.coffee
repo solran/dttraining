@@ -4,17 +4,14 @@ class Instruction
 class InstructionView
   constructor: (@instruction) ->
     @elem = $('<div>').addClass('instruction').html(@instruction.text)
-    #$(window).on 'click'
-
-    $(window).on 'click', (event) =>
+    if @instruction.timeout =='click'
+      $(window).on 'click', (event) =>
       $(window).off 'click'
       $(@).trigger "instruction.completed"
-
-
-    #setTimeout =>
-    #  $(@).trigger "instruction.completed"
-    #, 1000
- 
+    else if @instruction.timeout >0
+      setTimeout =>
+       $(@).trigger "instruction.completed"
+      , @instruction.timeout 
 
 class Stimulus
   constructor: (@type, key) ->
@@ -91,6 +88,10 @@ class BlockView
     @curr = 0
     
     @start()
+    $(window).on 'click', (event) =>
+      if @completed()
+         @curr++
+         @next()
   
   completed: ->
     for attempt in @block.collection[@curr]
@@ -109,12 +110,7 @@ class BlockView
 
     if @curr < @block.n
       view = new InstructionView(BlockView.loadingIcon)
-      $(view).on 'instruction.completed', (event) =>
-        $(window).on 'click', (event) =>
-          if @completed()
-            @curr++
-            @next()
-        @show()
+      $(view).on 'instruction.completed', @show
       @elem.html(view.elem)
 
     else
