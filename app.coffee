@@ -5,8 +5,7 @@ class InstructionView
   constructor: (@instruction) ->
     @elem = $('<div>').addClass('instruction').html(@instruction.text)
     if @instruction.timeout =='click'
-      $(window).on 'click', (event) =>
-        $(window).off 'click'
+      $(window).off('click').on 'click', (event) =>
         $(@).trigger "instruction.completed"
     else if @instruction.timeout >0
       setTimeout =>
