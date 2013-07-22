@@ -115,14 +115,17 @@ class BlockView
 
   show: =>
     $(window).off 'click'
-    $(window).on 'click', (event) =>
-      if @completed()
-        @curr++
-        @next()
+    @clickOn()
     @elem.html('')
     for attempt in @block.collection[@curr]
       view = new AttemptView(attempt)
       @elem.append(view.elem)
+
+  clickOn:=>
+    $(window).on 'click', (event) =>
+      if @completed()
+        @curr++
+        @next()
 
 class App
   constructor: (@blocks...) ->
