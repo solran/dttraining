@@ -83,9 +83,8 @@ class BlockView
   
   constructor: (@block) ->
     @elem = $('<div>').addClass('block')
-    @inst = new Instruction("Welcome to #{@block.id}!", 'click')
     @curr = 0
-    
+    @currInst = 0
     @start()      
   
   completed: ->
@@ -95,9 +94,14 @@ class BlockView
     true
 
   start: =>    
-    view = new InstructionView(@inst)
-    $(view).on "instruction.completed", @next
-    @elem.html(view.elem)
+    if @currInst<@block.instructions.length
+      view = new InstructionView(@block.instructions[@currInst])
+      @elem.html(view.elem)
+      @currInst++
+      $(view).on "instruction.completed", @start
+    else
+      @next()
+
 
   next: =>
     $(window).off 'keydown'
