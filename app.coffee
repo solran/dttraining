@@ -51,12 +51,12 @@ class AttemptView
       key = String.fromCharCode(event.which)
       
       if key in @attempt.trial.keys
-        @attempt.answer(key)
-
-        if @attempt.success
-          @elem.html('Success')
-        else
-          @elem.html('BOOOHHH!')
+        if !@attempt.completed()
+          @attempt.answer(key)
+          if @attempt.success
+            @elem.html('Success')
+          else
+            @elem.html('BOOOHHH!')
 
 class Trial
   constructor: (@stimuli...) ->
