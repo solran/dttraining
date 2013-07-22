@@ -62,7 +62,7 @@ class Trial
     @keys = @stimuli.map (stimulus) -> stimulus.key
 
 class Block
-  constructor: (@id, @n, @trials...) ->
+  constructor: (@id, @instructions, @n, @trials...) ->
     @collection = []
 
     for n in [0...@n]
@@ -139,8 +139,14 @@ class App
 
 
 # program configuration
+
 block1 = new Block(
   "Block1",
+  [
+    new Instruction("Welcome to the block 1", 2000),
+    new Instruction("Explication 1", 'click'),
+    new Instruction("Explication 2", 'click')
+  ],
   2,
   new Trial(
     new Stimulus('square', 'j'),
@@ -154,6 +160,11 @@ block1 = new Block(
 
 block2 = new Block(
   "Block2",
+  [
+    new Instruction("Welcome to the block 2", 2000),
+    new Instruction("Explication 3", 'click'),
+    new Instruction("Explication 4", 'click')
+  ],
   2,
   new Trial(
     new Stimulus('square', 'j'),
