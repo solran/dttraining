@@ -80,6 +80,8 @@ class Block
 
 class BlockView
   @loadingIcon = new Instruction("*", 200)
+  @lateMessage = new Instruction("Too late!", 1000)
+  @inTimeMessage = new Instruction("In Time!", 1000)
   
   constructor: (@block) ->
     @elem = $('<div>').addClass('block')
@@ -115,7 +117,7 @@ class BlockView
 
   show: =>
     $(window).off 'click'
-    @clickOn()
+    @timerOn()
     @elem.html('')
     for attempt in @block.collection[@curr]
       view = new AttemptView(attempt)
@@ -126,6 +128,18 @@ class BlockView
       if @completed()
         @curr++
         @next()
+
+  timerOn:=> 
+    setTimeout =>
+      if !@completed()
+        view = new InstructionView(BlockView.lateMessage)
+      else 
+        view = new InstructionView(BlockView.inTimeMessage)
+      @elem.html(view.elem)
+      $(view).on 'instruction.completed', (event) =>
+        @curr++
+        @next()
+    , 2000    
 
 class App
   constructor: (@blocks...) ->
