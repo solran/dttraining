@@ -6,12 +6,12 @@ class InstructionView
     @elem = $('<div>').addClass('instruction').html(@instruction.text)
     if @instruction.timeout =='click'
       $(window).on 'click', (event) =>
-      $(window).off 'click'
-      $(@).trigger "instruction.completed"
+        $(window).off 'click'
+        $(@).trigger "instruction.completed"
     else if @instruction.timeout >0
       setTimeout =>
-       $(@).trigger "instruction.completed"
-      , @instruction.timeout 
+        $(@).trigger "instruction.completed"
+      , @instruction.timeout       
 
 class Stimulus
   constructor: (@type, key) ->
@@ -71,7 +71,7 @@ class Block
 
       for trial in @trials
         @collection[n].push(new Attempt(trial))
-
+#unused
   completed: ->
     for attempts in @collection
       for attempt in attempts
@@ -84,14 +84,10 @@ class BlockView
   
   constructor: (@block) ->
     @elem = $('<div>').addClass('block')
-    @inst = new Instruction("Welcome to #{@block.id}!")
+    @inst = new Instruction("Welcome to #{@block.id}!", 'click')
     @curr = 0
     
-    @start()
-    $(window).on 'click', (event) =>
-      if @completed()
-         @curr++
-         @next()
+    @start()      
   
   completed: ->
     for attempt in @block.collection[@curr]
@@ -101,23 +97,25 @@ class BlockView
 
   start: =>    
     view = new InstructionView(@inst)
-
     $(view).on "instruction.completed", @next
     @elem.html(view.elem)
 
   next: =>
     $(window).off 'keydown'
-
     if @curr < @block.n
       view = new InstructionView(BlockView.loadingIcon)
       $(view).on 'instruction.completed', @show
       @elem.html(view.elem)
-
     else
       $(window).off 'click'
       $(@).trigger "block.completed"
 
   show: =>
+    $(window).off 'click'
+    $(window).on 'click', (event) =>
+      if @completed()
+        @curr++
+        @next()
     @elem.html('')
     for attempt in @block.collection[@curr]
       view = new AttemptView(attempt)
