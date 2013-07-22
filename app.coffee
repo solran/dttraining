@@ -62,7 +62,7 @@ class Trial
     @keys = @stimuli.map (stimulus) -> stimulus.key
 
 class Block
-  constructor: (@id, @instructions, @n, @trials...) ->
+  constructor: (@id, @instructions, @n, @timeLimit, @trials...) ->
     @collection = []
 
     for n in [0...@n]
@@ -117,7 +117,10 @@ class BlockView
 
   show: =>
     $(window).off 'click'
-    @timerOn()
+    if @block.timeLimit == 'unlimited'
+      @clickOn()
+    else if @block.timeLimit>0
+      @timerOn()
     @elem.html('')
     for attempt in @block.collection[@curr]
       view = new AttemptView(attempt)
@@ -139,7 +142,7 @@ class BlockView
       $(view).on 'instruction.completed', (event) =>
         @curr++
         @next()
-    , 2000    
+    , @block.timeLimit    
 
 class App
   constructor: (@blocks...) ->
@@ -169,6 +172,7 @@ block1 = new Block(
     new Instruction("Explication 2", 'click')
   ],
   2,
+  3000,
   new Trial(
     new Stimulus('square', 'j'),
     new Stimulus('circle', 'k')
@@ -187,6 +191,7 @@ block2 = new Block(
     new Instruction("Explication 4", 'click')
   ],
   2,
+  'unlimited',
   new Trial(
     new Stimulus('square', 'j'),
     new Stimulus('circle', 'k')
