@@ -75,27 +75,19 @@ class Trial
 
 class Block
   constructor: (@id, @instructions, @n, @timeLimit, @trials...) ->
-    @collection = []
-    @buttons = []
+    @attempt_collection = []
+    @button_collection = []     
     keys = []
 
     for n in [0...@n]
-      @collection[n] = []
+      @attempt_collection[n] = []
 
       for trial in @trials
-        @collection[n].push(new Attempt(trial))
+        @attempt_collection[n].push(new Attempt(trial))
         for key in trial.keys
           keys.push(key) if keys.indexOf(key) == -1
 
-    @buttons = (new Button("buttonA", key, keys[key]) for key in keys)
-
-#unused
-  completed: ->
-    for attempts in @collection
-      for attempt in attempts
-        return false unless attempt.completed()
-
-    true
+    @button_collection = (new Button("buttonA", key, keys[key]) for key in keys)
 
 class BlockView
   @loadingIcon = new Instruction("*", 200)
@@ -106,10 +98,10 @@ class BlockView
     @elem = $('<div>').addClass('block')
     @curr = 0
     @currInst = 0
-    @start()     
-  
+    @start()
+
   completed: ->
-    for attempt in @block.collection[@curr]
+    for attempt in @block.attempt_collection[@curr]
       return false unless attempt.completed()
 
     true
@@ -143,12 +135,12 @@ class BlockView
     else if @block.timeLimit>0
       @timerOn()
     @elem.html('')
-    for attempt in @block.collection[@curr]
+    for attempt in @block.attempt_collection[@curr]
       attempt_view = new AttemptView(attempt)
       @elem.append(attempt_view.elem)
 
   addButtons:=> 
-    button_view = new ButtonView(@block.buttons)
+    button_view = new ButtonView(@block.button_collection)
     $("body").append(button_view.elem) 
     $(button_view).on 'success', (event) =>
     $(button_view).on 'failure', (event) =>
