@@ -61,11 +61,11 @@ class AttemptView
           @attempt.answer(key)
           if @attempt.success
             @elem.html('Success')
-            $(@).trigger "success"
+            $(window).trigger "success"
           else
             @elem 
             @elem.html('BOOOHHH!')
-            $(@).trigger "failure"
+            $(window).trigger "failure"
 
 class Trial
   constructor: (@stimuli...) ->
@@ -141,9 +141,13 @@ class BlockView
     @button_view = $('<div>').addClass('button')
     for button, i in @block.button_collection
       @button_view.append(new ButtonView(button, @block.button_collection.length, i).elem)
+      $(window).on 'success', (event) =>
+        @button_view.append($('<div>').addClass('buttonC'))
+        $("body").append(@button_view) 
+      $(window).on 'failure', (event) =>
+        @button_view.append($('<div>').addClass('buttonB'))
+        $("body").append(@button_view) 
     $("body").append(@button_view) 
-    $(@button_view).on 'success', (event) =>
-    $(@button_view).on 'failure', (event) =>
 
   clickOn:=>
     $(window).on 'click', (event) =>
