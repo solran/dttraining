@@ -72,7 +72,6 @@ class Trial
 
 class Block
   constructor: (@id, @instructions, @n, @timeLimit, @buttons, @trials...) ->
-    console.log @buttons
     @collection = []
 
     for n in [0...@n]
@@ -163,6 +162,8 @@ class App
       view = new BlockView(block)
       $("body").html(view.elem)
       $(view).on "block.completed", @switch
+      view2 = new ButtonView(block.buttons)
+      $("body").append(view2.elem)
     else
       console.log "app.completed"
 

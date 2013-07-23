@@ -4,6 +4,15 @@
   padding: 12px;
 }
 
+.button {
+  border-radius: 15px;
+  text-align: center;
+  position:absolute;
+  bottom: 0;
+  height: 100px;
+  width: 100%;
+}
+
 .attempt {
   float: left;
   text-align: center;
@@ -34,4 +43,16 @@
 .moon {
   background-color: blue;
   border-radius: 50px;
+}
+
+.buttonA {
+  background-color: #6495ED;
+}
+
+.buttonB {
+  background-color: #CD5C5C;
+}
+
+.buttonC {
+  background-color: #B8860B;
 }
