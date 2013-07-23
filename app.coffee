@@ -82,7 +82,7 @@ class Block
       for trial in @trials
         @collection[n].push(new Attempt(trial))
         for key in trial.keys
-          keys.push(key) if $.inArray(key, keys) == -1
+          keys.push(key) if keys.indexOf(key) == -1
 
     @buttons = (new Button("buttonA", key, keys[key]) for key in keys)
 
