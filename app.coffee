@@ -76,15 +76,16 @@ class Block
     @buttons = []
     keys = []
 
-    for trial in @trials
-      keys.push trial.keys...
-    @buttons = (new Button("buttonA", key, keys[key]) for key in keys)
-    console.log @buttons
     for n in [0...@n]
       @collection[n] = []
 
       for trial in @trials
         @collection[n].push(new Attempt(trial))
+        for key in trial.keys
+          keys.push(key) if $.inArray(key, keys) == -1
+
+    @buttons = (new Button("buttonA", key, keys[key]) for key in keys)
+
 #unused
   completed: ->
     for attempts in @collection
