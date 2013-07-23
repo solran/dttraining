@@ -5,10 +5,8 @@ class Button
   constructor:(@type, @text) ->
 
 class ButtonView
-  constructor: (@buttons) ->
-    @elem = $('<div>').addClass('button')
-    for button, i in @buttons
-      @elem.append($('<div>').addClass('button').addClass(button.type).html(button.text).css('width', 100 / @buttons.length + '%').css('left', (100/@buttons.length)*i + '%'))
+  constructor: (@button, @qte, @position) ->
+    @elem = $('<div>').addClass('button').addClass(button.type).html(button.text).css('width', 100 / @qte + '%').css('left', (100/@qte)*@position + '%')
 
 class InstructionView
   constructor: (@instruction) ->
@@ -140,10 +138,12 @@ class BlockView
       @elem.append(attempt_view.elem)
 
   addButtons:=> 
-    button_view = new ButtonView(@block.button_collection)
-    $("body").append(button_view.elem) 
-    $(button_view).on 'success', (event) =>
-    $(button_view).on 'failure', (event) =>
+    @button_view = $('<div>').addClass('button')
+    for button, i in @block.button_collection
+      @button_view.append(new ButtonView(button, @block.button_collection.length, i).elem)
+    $("body").append(@button_view) 
+    $(@button_view).on 'success', (event) =>
+    $(@button_view).on 'failure', (event) =>
 
   clickOn:=>
     $(window).on 'click', (event) =>
