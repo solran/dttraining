@@ -71,9 +71,16 @@ class Trial
     @keys = @stimuli.map (stimulus) -> stimulus.key
 
 class Block
-  constructor: (@id, @instructions, @n, @timeLimit, @buttons, @trials...) ->
+  constructor: (@id, @instructions, @n, @timeLimit, @trials...) ->
     @collection = []
+    @buttons = []
+    keys = []
 
+    for trial in @trials
+      for n in [0...trial.keys.length]
+        keys.push(trial.keys[n])
+    for n in [0...keys.length]
+      @buttons[n] = new Button("buttonA", keys[n])
     for n in [0...@n]
       @collection[n] = []
 
@@ -184,11 +191,6 @@ block1 = new Block(
   ],
   2,
   3000,
-  [
-    new Button("buttonA","ASTRE"),
-    new Button("buttonB", "FORME"),
-    new Button("buttonC", "ESC"),
-  ],
   new Trial(
     new Stimulus('square', 'j'),
     new Stimulus('circle', 'k')
@@ -208,12 +210,6 @@ block2 = new Block(
   ],
   2,
   'unlimited',
-  [
-    new Button("buttonC","DO"),
-    new Button("buttonB", "RE"),
-    new Button("buttonA", "MI"),
-    new Button("buttonC","FA"),
-  ],
   new Trial(
     new Stimulus('square', 'j'),
     new Stimulus('circle', 'k')
