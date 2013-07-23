@@ -63,8 +63,11 @@ class AttemptView
           @attempt.answer(key)
           if @attempt.success
             @elem.html('Success')
+            $(@).trigger "success"
           else
+            @elem 
             @elem.html('BOOOHHH!')
+            $(@).trigger "failure"
 
 class Trial
   constructor: (@stimuli...) ->
@@ -126,8 +129,7 @@ class BlockView
     if @curr < @block.n
       inst_view = new InstructionView(BlockView.loadingIcon)
       $(inst_view).on 'instruction.completed', (event) =>
-        button_view = new ButtonView(@block.buttons)
-        $("body").append(button_view.elem) 
+        @addButtons()
         @show()
       @elem.html(inst_view.elem)
     else
@@ -144,6 +146,12 @@ class BlockView
     for attempt in @block.collection[@curr]
       attempt_view = new AttemptView(attempt)
       @elem.append(attempt_view.elem)
+
+  addButtons:=> 
+    button_view = new ButtonView(@block.buttons)
+    $("body").append(button_view.elem) 
+    $(button_view).on 'success', (event) =>
+    $(button_view).on 'failure', (event) =>
 
   clickOn:=>
     $(window).on 'click', (event) =>
