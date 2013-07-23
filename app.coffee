@@ -103,7 +103,7 @@ class BlockView
     @elem = $('<div>').addClass('block')
     @curr = 0
     @currInst = 0
-    @start()      
+    @start()     
   
   completed: ->
     for attempt in @block.collection[@curr]
@@ -125,7 +125,10 @@ class BlockView
     $(window).off 'keydown'
     if @curr < @block.n
       view = new InstructionView(BlockView.loadingIcon)
-      $(view).on 'instruction.completed', @show
+      $(view).on 'instruction.completed', (event) =>
+        view2 = new ButtonView(@block.buttons)
+        $("body").append(view2.elem) 
+        @show()
       @elem.html(view.elem)
     else
       $(window).off 'click'
@@ -169,8 +172,6 @@ class App
       view = new BlockView(block)
       $("body").html(view.elem)
       $(view).on "block.completed", @switch
-      view2 = new ButtonView(block.buttons)
-      $("body").append(view2.elem)
     else
       console.log "app.completed"
 
@@ -196,7 +197,7 @@ block1 = new Block(
     new Stimulus('circle', 'k')
   ),
   new Trial(
-    new Stimulus('sun', 's'),
+    new Stimulus('sun', 'j'),
     new Stimulus('moon', 'd')
   )
 )
