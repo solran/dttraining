@@ -51,8 +51,8 @@ class Attempt
 class AttemptView
   constructor: (@attempt) ->
     @elem = $('<div>').addClass('attempt').css('width', 100 / @attempt.trial.stimuli.length + '%')
-    view = new StimulusView(@attempt.stimulus)
-    @elem.html(view.elem)
+    attempt_view = new StimulusView(@attempt.stimulus)
+    @elem.html(attempt_view.elem)
     @attempt.startedOn = Date.now()
 
     $(window).on 'keydown', (event) =>
@@ -113,10 +113,10 @@ class BlockView
 
   start: =>    
     if @currInst<@block.instructions.length
-      view = new InstructionView(@block.instructions[@currInst])
-      @elem.html(view.elem)
+      inst_view = new InstructionView(@block.instructions[@currInst])
+      @elem.html(inst_view.elem)
       @currInst++
-      $(view).on "instruction.completed", @start
+      $(inst_view).on "instruction.completed", @start
     else
       @next()
 
@@ -124,12 +124,12 @@ class BlockView
   next: =>
     $(window).off 'keydown'
     if @curr < @block.n
-      view = new InstructionView(BlockView.loadingIcon)
-      $(view).on 'instruction.completed', (event) =>
-        view2 = new ButtonView(@block.buttons)
-        $("body").append(view2.elem) 
+      inst_view = new InstructionView(BlockView.loadingIcon)
+      $(inst_view).on 'instruction.completed', (event) =>
+        button_view = new ButtonView(@block.buttons)
+        $("body").append(button_view.elem) 
         @show()
-      @elem.html(view.elem)
+      @elem.html(inst_view.elem)
     else
       $(window).off 'click'
       $(@).trigger "block.completed"
@@ -142,8 +142,8 @@ class BlockView
       @timerOn()
     @elem.html('')
     for attempt in @block.collection[@curr]
-      view = new AttemptView(attempt)
-      @elem.append(view.elem)
+      attempt_view = new AttemptView(attempt)
+      @elem.append(attempt_view.elem)
 
   clickOn:=>
     $(window).on 'click', (event) =>
@@ -154,11 +154,11 @@ class BlockView
   timerOn:=> 
     setTimeout =>
       if !@completed()
-        view = new InstructionView(BlockView.lateMessage)
+        inst_view = new InstructionView(BlockView.lateMessage)
       else 
-        view = new InstructionView(BlockView.inTimeMessage)
-      @elem.html(view.elem)
-      $(view).on 'instruction.completed', (event) =>
+        inst_view = new InstructionView(BlockView.inTimeMessage)
+      @elem.html(inst_view.elem)
+      $(inst_view).on 'instruction.completed', (event) =>
         @curr++
         @next()
     , @block.timeLimit    
@@ -169,9 +169,9 @@ class App
 
   next: ->
     if block = @blocks[@curr]
-      view = new BlockView(block)
-      $("body").html(view.elem)
-      $(view).on "block.completed", @switch
+      block_view = new BlockView(block)
+      $("body").html(block_view.elem)
+      $(block_view).on "block.completed", @switch
     else
       console.log "app.completed"
 
