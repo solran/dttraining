@@ -77,10 +77,9 @@ class Block
     keys = []
 
     for trial in @trials
-      for n in [0...trial.keys.length]
-        keys.push(trial.keys[n])
-    for n in [0...keys.length]
-      @buttons[n] = new Button("buttonA", keys[n])
+      keys.push trial.keys...
+    @buttons = (new Button("buttonA", key, keys[key]) for key in keys)
+    console.log @buttons
     for n in [0...@n]
       @collection[n] = []
 
