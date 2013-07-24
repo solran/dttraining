@@ -67,9 +67,11 @@ class Trial
     @keys = @stimuli.map (stimulus) -> stimulus.key
 
 class Block
-  constructor: (@id, @instructions, @n, @timeLimit, @trials...) ->
+  constructor: (@id, @instructions, @n, @pourSingleMixedTrial, @timeLimit, @trials...) ->
     @attempt_collection = []
-    @button_collection = []     
+    @button_collection = [] 
+    @qteStimuli = 0   
+    @qteSingleMixedTrial = 0
     keys = []
 
     for n in [0...@n]
@@ -77,6 +79,7 @@ class Block
 
     for trial in @trials
       curr=0
+      @qteStimuli = trial.stimuli.length
       for n in [0...(@n/trial.stimuli.length)] 
         for o in [0...trial.stimuli.length]
           if (curr < @n)
@@ -85,6 +88,15 @@ class Block
         keys.push(key) if keys.indexOf(key) == -1
     
     @button_collection = (new Button("buttonA", key, keys[key]) for key in keys)
+    @qteSingleMixedTrial = @validatedPourSingleMixedTrial()
+    console.log @qteSingleMixedTrial
+
+  validatedPourSingleMixedTrial : ->
+    verif = Math.round(@pourSingleMixedTrial/100*@n/@qteStimuli)*@qteStimuli
+    if verif/@n*100 != @pourSingleMixedTrial
+      console.log "#{@pourSingleMixedTrial}% d'essais simple mixte n'est pas valide. Modifiez pour le plus proche valide : #{verif/@n*100}%"
+      @pourSingleMixedTrial = verif/@n*100
+    verif
 
 class BlockView
   @loadingIcon = new Instruction("*", 200)
@@ -188,6 +200,7 @@ block1 = new Block(
     new Instruction("Explication 2", 'click')
   ],
   8,
+  50,
   3000,
   new Trial(
     new Stimulus('square', 'a'),
@@ -211,6 +224,7 @@ block2 = new Block(
     new Instruction("Explication 4", 'click')
   ],
   4,
+  25,
   'unlimited',
   new Trial(
     new Stimulus('square', 'j'),
