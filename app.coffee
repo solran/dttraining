@@ -28,8 +28,7 @@ class StimulusView
     @elem = $('<div>').addClass('stimulus').addClass(@stimulus.type)
 
 class Attempt
-  constructor: (@trial) ->
-    @stimulus   = @trial.stimuli[Math.floor(Math.random() * @trial.stimuli.length)]
+  constructor: (@stimulus, @trial, @nTotalTrial) ->
     @success    = null
     @response   = null
     @startedOn  = null
@@ -47,22 +46,20 @@ class Attempt
     @answeredOn = Date.now()
 
 class AttemptView
-  constructor: (@attempt) ->
-    @elem = $('<div>').addClass('attempt').css('width', 100 / @attempt.trial.stimuli.length + '%')
-    attempt_view = new StimulusView(@attempt.stimulus)
-    @elem.html(attempt_view.elem)
+  constructor: (@attempt) -> 
+    @elem = $('<div>').addClass('attempt').css('width', 100 / @attempt.nTotalTrial + '%')
+    view = new StimulusView(@attempt.stimulus)
+    @elem.html(view.elem)
     @attempt.startedOn = Date.now()
 
     $(window).on 'keydown', (event) =>
       key = String.fromCharCode(event.which)
-      
       if key in @attempt.trial.keys
         if !@attempt.completed()
           @attempt.answer(key)
           if @attempt.success
             @elem.html('Success')
           else
-            @elem 
             @elem.html('BOOOHHH!')
 
 class Trial
@@ -78,11 +75,13 @@ class Block
     for n in [0...@n]
       @attempt_collection[n] = []
 
-      for trial in @trials
-        @attempt_collection[n].push(new Attempt(trial))
-        for key in trial.keys
-          keys.push(key) if keys.indexOf(key) == -1
-
+    for trial in @trials
+      curr=0
+      for o in [0...trial.stimuli.length]
+        for p in [0...(@n/trial.stimuli.length)] 
+          @attempt_collection[curr++].push(new Attempt(trial.stimuli[o], trial, @trials.length))
+      for key in trial.keys
+        keys.push(key) if keys.indexOf(key) == -1
     @button_collection = (new Button("buttonA", key, keys[key]) for key in keys)
 
 class BlockView
@@ -186,15 +185,19 @@ block1 = new Block(
     new Instruction("Explication 1", 'click'),
     new Instruction("Explication 2", 'click')
   ],
-  2,
+  8,
   3000,
   new Trial(
-    new Stimulus('square', 'j'),
-    new Stimulus('circle', 'k')
+    new Stimulus('square', 'a'),
+    new Stimulus('circle', 's'),
+    new Stimulus('sun', 'd'),
+    new Stimulus('moon', 'f')
   ),
   new Trial(
-    new Stimulus('sun', 'j'),
-    new Stimulus('moon', 'd')
+    new Stimulus('square', 'h'),
+    new Stimulus('circle', 'j'),
+    new Stimulus('sun', 'k'),
+    new Stimulus('moon', 'l')
   )
 )
 
@@ -205,7 +208,7 @@ block2 = new Block(
     new Instruction("Explication 3", 'click'),
     new Instruction("Explication 4", 'click')
   ],
-  2,
+  4,
   'unlimited',
   new Trial(
     new Stimulus('square', 'j'),
