@@ -28,7 +28,7 @@ class StimulusView
     @elem = $('<div>').addClass('stimulus').addClass(@stimulus.type)
 
 class Attempt
-  constructor: (@stimulus, @trial, @nTotalTrial) ->
+  constructor: (@stimulus, @totalKeys, @nTotalTrial) ->
     @success    = null
     @response   = null
     @startedOn  = null
@@ -54,7 +54,7 @@ class AttemptView
 
     $(window).on 'keydown', (event) =>
       key = String.fromCharCode(event.which)
-      if key in @attempt.trial.keys
+      if key in @attempt.totalKeys
         if !@attempt.completed()
           @attempt.answer(key)
           if @attempt.success
@@ -79,7 +79,7 @@ class Block
       curr=0
       for o in [0...trial.stimuli.length]
         for p in [0...(@n/trial.stimuli.length)] 
-          @attempt_collection[curr++].push(new Attempt(trial.stimuli[o], trial, @trials.length))
+          @attempt_collection[curr++].push(new Attempt(trial.stimuli[o], trial.keys, @trials.length))
       for key in trial.keys
         keys.push(key) if keys.indexOf(key) == -1
     @button_collection = (new Button("buttonA", key, keys[key]) for key in keys)
