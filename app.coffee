@@ -77,11 +77,13 @@ class Block
 
     for trial in @trials
       curr=0
-      for o in [0...trial.stimuli.length]
-        for p in [0...(@n/trial.stimuli.length)] 
-          @attempt_collection[curr++].push(new Attempt(trial.stimuli[o], trial.keys, @trials.length))
+      for n in [0...(@n/trial.stimuli.length)] 
+        for o in [0...trial.stimuli.length]
+          if (curr < @n)
+            @attempt_collection[curr++].push(new Attempt(trial.stimuli[o], trial.keys, @trials.length))
       for key in trial.keys
         keys.push(key) if keys.indexOf(key) == -1
+    
     @button_collection = (new Button("buttonA", key, keys[key]) for key in keys)
 
 class BlockView
