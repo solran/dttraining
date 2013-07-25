@@ -77,14 +77,14 @@ class Block
     @id = options['id'] || 'Block'
     @time_limit = options['time_limit'] || 'unlimited'
     @number_of_attempts = options['number_of_attempts'] || 2
-    @attempts = []
+    @attempt_collection = []
     @buttons = []
 
     for i in [0...@number_of_attempts]
-      @attempts[i] = []
+      @attempt_collection[i] = []
 
       for trial in @trials
-        @attempts[i].push(new Attempt(trial))
+        @attempt_collection[i].push(new Attempt(trial))
         
         for key in trial.keys
           unless (@buttons.some (button) -> button.key == key)
@@ -103,7 +103,8 @@ class BlockView
     @start()
 
   completed: ->
-    for attempt in @block.attempt_collection[@curr]
+    #console.log @block.attempt_collection[@current_block]
+    for attempt in @block.attempt_collection[@current_block]
       return false unless attempt.completed()
 
     true
@@ -141,7 +142,7 @@ class BlockView
     
     @elem.html('')
     
-    for attempt in @block.attempts[@current_block]
+    for attempt in @block.attempt_collection[@current_block]
       view = new AttemptView(attempt)
       @elem.append(view.elem)
 
