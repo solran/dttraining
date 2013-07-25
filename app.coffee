@@ -57,7 +57,7 @@ class AttemptView
     $(window).on 'keydown', (event) =>
       key = String.fromCharCode(event.which)
       if key in @attempt.totalKeys
-        if !@attempt.completed()
+        unless @attempt.completed()
           @attempt.answer(key)
           if @attempt.success
             @elem.html('Success')
@@ -69,7 +69,7 @@ class Trial
     @keys = @stimuli.map (stimulus) -> stimulus.key
 
 class Block
-  constructor: (@id, @instructions, @n, @pourSingleMixedTrial, @timeLimit, @trials...) ->
+  constructor: (@id, @instructions, @n, @pourcentageSingleMixedTrial, @timeLimit, @trials...) ->
     @attempt_collection = []
     @button_collection = [] 
     @qteStimuli = 0   
@@ -90,13 +90,13 @@ class Block
         keys.push(key) if keys.indexOf(key) == -1
     
     @button_collection = (new Button("buttonA", key, keys[key]) for key in keys)
-    @qteSingleMixedTrial = @validatedPourSingleMixedTrial()
+    @qteSingleMixedTrial = @validatedPourcentageSingleMixedTrial()
 
-  validatedPourSingleMixedTrial : ->
-    verif = Math.round(@pourSingleMixedTrial/100*@n/@qteStimuli)*@qteStimuli
-    if verif/@n*100 != @pourSingleMixedTrial
-      console.log "#{@pourSingleMixedTrial}% d'essais simple mixte n'est pas valide. Modifiez pour le plus proche valide : #{verif/@n*100}%"
-      @pourSingleMixedTrial = verif/@n*100
+  validatedPourcentageSingleMixedTrial : ->
+    verif = Math.round(@pourcentageSingleMixedTrial/100*@n/@qteStimuli)*@qteStimuli
+    unless verif/@n*100 == @pourcentageSingleMixedTrial
+      console.log "#{@pourcentageSingleMixedTrial}% d'essais simple mixte n'est pas valide. Modifiez pourcentage le plus proche valide : #{verif/@n*100}%"
+      @pourcentageSingleMixedTrial = verif/@n*100
     verif
 
 class BlockView
@@ -163,7 +163,7 @@ class BlockView
 
   timerOn:=> 
     setTimeout =>
-      if !@completed()
+      unless @completed()
         inst_view = new InstructionView(BlockView.lateMessage)
       else 
         inst_view = new InstructionView(BlockView.inTimeMessage)
