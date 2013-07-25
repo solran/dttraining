@@ -1,20 +1,22 @@
-class Instruction
-  constructor: (@text, @timeout = 1000) ->
-
 class Button
-  constructor:(@type, @text) ->
+  constructor:(@key) ->
 
 class ButtonView
-  constructor: (@button, @qte, @position) ->
-    @elem = $('<div>').addClass('button').addClass(button.type).html(button.text).css('width', 100 / @qte + '%').css('left', (100/@qte)*@position + '%')
+  constructor: (@button, @options) ->
+    @elem = $('<div>').addClass('button').addClass(button.key).html(button.key).css(@options)
+
+class Instruction
+  constructor: (@text, @timeout = 1000) ->
 
 class InstructionView
   constructor: (@instruction) ->
     @elem = $('<div>').addClass('instruction').html(@instruction.text)
-    if @instruction.timeout =='click'
+    
+    if @instruction.timeout == 'click'
       $(window).off('click').on 'click', (event) =>
         $(@).trigger "instruction.completed"
-    else if @instruction.timeout >0
+    
+    if @instruction.timeout > 0
       setTimeout =>
         $(@).trigger "instruction.completed"
       , @instruction.timeout       
@@ -57,12 +59,12 @@ class AttemptView
       key = String.fromCharCode(event.which)
       
       if key in @attempt.trial.keys
-        if !@attempt.completed()
+        unless @attempt.completed()
           @attempt.answer(key)
+          
           if @attempt.success
             @elem.html('Success')
           else
-            @elem 
             @elem.html('BOOOHHH!')
 
 class Trial
@@ -70,30 +72,34 @@ class Trial
     @keys = @stimuli.map (stimulus) -> stimulus.key
 
 class Block
-  constructor: (@id, @instructions, @n, @timeLimit, @trials...) ->
-    @attempt_collection = []
-    @button_collection = []     
-    keys = []
 
-    for n in [0...@n]
-      @attempt_collection[n] = []
+  constructor: (@instructions, @trials, options = {}) ->
+    @id = options['id'] || 'Block'
+    @time_limit = options['time_limit'] || 'unlimited'
+    @number_of_attempts = options['number_of_attempts'] || 2
+    @attempts = []
+    @buttons = []
+
+    for i in [0...@number_of_attempts]
+      @attempts[i] = []
 
       for trial in @trials
-        @attempt_collection[n].push(new Attempt(trial))
+        @attempts[i].push(new Attempt(trial))
+        
         for key in trial.keys
-          keys.push(key) if keys.indexOf(key) == -1
-
-    @button_collection = (new Button("buttonA", key, keys[key]) for key in keys)
+          unless (@buttons.some (button) -> button.key == key)
+            @buttons.push(new Button(key))
 
 class BlockView
   @loadingIcon = new Instruction("*", 200)
-  @lateMessage = new Instruction("Too late!", 1000)
-  @inTimeMessage = new Instruction("In Time!", 1000)
+  @lateMessage = new Instruction("Too late!")
+  @inTimeMessage = new Instruction("In Time!")
   
   constructor: (@block) ->
     @elem = $('<div>').addClass('block')
-    @curr = 0
-    @currInst = 0
+    @current_block = 0
+    @current_instruction = 0
+    
     @start()
 
   completed: ->
@@ -103,68 +109,74 @@ class BlockView
     true
 
   start: =>    
-    if @currInst<@block.instructions.length
-      inst_view = new InstructionView(@block.instructions[@currInst])
-      @elem.html(inst_view.elem)
-      @currInst++
-      $(inst_view).on "instruction.completed", @start
+    if @current_instruction < @block.instructions.length
+      view = new InstructionView(@block.instructions[@current_instruction])
+      $(view).on "instruction.completed", @start
+      @current_instruction++
+      @elem.html(view.elem)
     else
       @next()
 
 
   next: =>
     $(window).off 'keydown'
-    if @curr < @block.n
-      inst_view = new InstructionView(BlockView.loadingIcon)
-      $(inst_view).on 'instruction.completed', (event) =>
+    
+    if @current_block < @block.number_of_attempts
+      view = new InstructionView(BlockView.loadingIcon)
+      $(view).on 'instruction.completed', (event) =>
         @addButtons()
         @show()
-      @elem.html(inst_view.elem)
+      @elem.html(view.elem)
     else
       $(window).off 'click'
       $(@).trigger "block.completed"
 
   show: =>
     $(window).off 'click'
-    if @block.timeLimit == 'unlimited'
+    
+    if @block.time_limit == 'unlimited'
       @clickOn()
-    else if @block.timeLimit>0
+    else if @block.time_limit > 0
       @timerOn()
+    
     @elem.html('')
-    for attempt in @block.attempt_collection[@curr]
-      attempt_view = new AttemptView(attempt)
-      @elem.append(attempt_view.elem)
+    
+    for attempt in @block.attempts[@current_block]
+      view = new AttemptView(attempt)
+      @elem.append(view.elem)
 
-  addButtons:=> 
-    @button_view = $('<div>').addClass('button')
-    for button, i in @block.button_collection
-      @button_view.append(new ButtonView(button, @block.button_collection.length, i).elem)
-    $("body").append(@button_view) 
+  addButtons: => 
+    view = $('<div>').addClass('buttons')
+    for button, i in @block.buttons
+      view.append(new ButtonView(button, {width: 100 / @block.buttons.length + "%", left: 100 / @block.buttons.length * i + "%"}).elem)
+    $("body").append(view) 
 
-  clickOn:=>
+  clickOn: =>
     $(window).on 'click', (event) =>
       if @completed()
-        @curr++
+        @current_block++
         @next()
 
-  timerOn:=> 
+  timerOn: => 
     setTimeout =>
-      if !@completed()
-        inst_view = new InstructionView(BlockView.lateMessage)
-      else 
-        inst_view = new InstructionView(BlockView.inTimeMessage)
-      @elem.html(inst_view.elem)
-      $(inst_view).on 'instruction.completed', (event) =>
-        @curr++
+      view = if @completed()
+        new InstructionView(BlockView.inTimeMessage)
+      else
+        new InstructionView(BlockView.lateMessage)
+
+      @elem.html(view.elem)
+      
+      $(view).on 'instruction.completed', (event) =>
+        @current_block++
         @next()
-    , @block.timeLimit    
+    , @block.time_limit    
 
 class App
   constructor: (@blocks...) ->
-    @curr = 0
+    @current_block = 0
 
   next: ->
-    if block = @blocks[@curr]
+    if block = @blocks[@current_block]
       block_view = new BlockView(block)
       $("body").html(block_view.elem)
       $(block_view).on "block.completed", @switch
@@ -172,7 +184,7 @@ class App
       console.log "app.completed"
 
   switch: =>
-    @curr++
+    @current_block++
     @next()
 
 
@@ -180,41 +192,39 @@ class App
 # program configuration
 
 block1 = new Block(
-  "Block1",
   [
-    new Instruction("Welcome to the block 1", 2000),
-    new Instruction("Explication 1", 'click'),
-    new Instruction("Explication 2", 'click')
+    new Instruction("Welcome to the block 1", 2000)
+    # new Instruction("Explication 1", 'click'),
+    # new Instruction("Explication 2", 'click')
   ],
-  2,
-  3000,
-  new Trial(
-    new Stimulus('square', 'j'),
-    new Stimulus('circle', 'k')
-  ),
-  new Trial(
-    new Stimulus('sun', 'j'),
-    new Stimulus('moon', 'd')
-  )
+  [
+    new Trial(
+      new Stimulus('square', 's'),
+      new Stimulus('circle', 'd')
+    ),
+    new Trial(
+      new Stimulus('sun', 'j'),
+      new Stimulus('moon', 'k')
+    )
+  ]
 )
 
 block2 = new Block(
-  "Block2",
   [
-    new Instruction("Welcome to the block 2", 2000),
-    new Instruction("Explication 3", 'click'),
-    new Instruction("Explication 4", 'click')
+    new Instruction("Welcome to the block 2", 2000)
+    # new Instruction("Explication 3", 'click'),
+    # new Instruction("Explication 4", 'click')
   ],
-  2,
-  'unlimited',
-  new Trial(
-    new Stimulus('square', 'j'),
-    new Stimulus('circle', 'k')
-  ),
-  new Trial(
-    new Stimulus('sun', 's'),
-    new Stimulus('moon', 'd')
-  )
+  [
+    new Trial(
+      new Stimulus('square', 'j'),
+      new Stimulus('circle', 'k')
+    ),
+    new Trial(
+      new Stimulus('sun', 's'),
+      new Stimulus('moon', 'd')
+    )
+  ]
 )
 
 new App(block1, block2).next()
