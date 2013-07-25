@@ -28,7 +28,9 @@ class StimulusView
     @elem = $('<div>').addClass('stimulus').addClass(@stimulus.type)
 
 class Attempt
-  constructor: (@stimulus, @totalKeys, @nTotalTrial) ->
+  constructor: (@stimulus, options = {}) ->
+    @totalKeys = options['totalKeys'] || 1
+    @nTotalTrial = options['nTotalTrial'] || 1
     @success    = null
     @response   = null
     @startedOn  = null
@@ -83,13 +85,12 @@ class Block
       for n in [0...(@n/trial.stimuli.length)] 
         for o in [0...trial.stimuli.length]
           if (curr < @n)
-            @attempt_collection[curr++].push(new Attempt(trial.stimuli[o], trial.keys, @trials.length))
+            @attempt_collection[curr++].push(new Attempt(trial.stimuli[o], {totalKeys: trial.keys, nTotalTrial:@trials.length}))
       for key in trial.keys
         keys.push(key) if keys.indexOf(key) == -1
     
     @button_collection = (new Button("buttonA", key, keys[key]) for key in keys)
     @qteSingleMixedTrial = @validatedPourSingleMixedTrial()
-    console.log @qteSingleMixedTrial
 
   validatedPourSingleMixedTrial : ->
     verif = Math.round(@pourSingleMixedTrial/100*@n/@qteStimuli)*@qteStimuli
