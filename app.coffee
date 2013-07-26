@@ -31,6 +31,7 @@ class Attempt
   constructor: (@stimulus, options = {}) ->
     @totalKeys = options['totalKeys'] || 1
     @nTotalTrial = options['nTotalTrial'] || 1
+    @qteSingleMixedTrial = options['qteSingleMixedTrial'] || 0
     @success    = null
     @response   = null
     @startedOn  = null
@@ -72,31 +73,33 @@ class Block
   constructor: (@id, @instructions, @n, @pourcentageSingleMixedTrial, @timeLimit, @trials...) ->
     @attempt_collection = []
     @button_collection = [] 
-    @qteStimuli = 0   
-    @qteSingleMixedTrial = 0
     keys = []
+    qteSingleMixedTrial = 0
+    lastSingleMixedTrialMarker = 0
 
     for n in [0...@n]
       @attempt_collection[n] = []
 
-    for trial in @trials
-      curr=0
-      @qteStimuli = trial.stimuli.length
+    for trial,i in @trials
+      currTrial=0
+
+      qteSingleMixedTrial = @validatedPourcentageSingleMixedTrial(trial.stimuli.length, @trials.length)
       for n in [0...(@n/trial.stimuli.length)] 
         for o in [0...trial.stimuli.length]
-          if (curr < @n)
-            @attempt_collection[curr++].push(new Attempt(trial.stimuli[o], {totalKeys: trial.keys, nTotalTrial:@trials.length}))
+          unless lastSingleMixedTrialMarker<=currTrial<(lastSingleMixedTrialMarker+qteSingleMixedTrial) || currTrial>= @n
+            @attempt_collection[currTrial].push(new Attempt(trial.stimuli[o], {totalKeys: trial.keys, nTotalTrial:@trials.length, qteSingleMixedTrial:qteSingleMixedTrial}))
+          currTrial++
       for key in trial.keys
         keys.push(key) if keys.indexOf(key) == -1
+      lastSingleMixedTrialMarker = qteSingleMixedTrial
     
     @button_collection = (new Button("buttonA", key, keys[key]) for key in keys)
-    @qteSingleMixedTrial = @validatedPourcentageSingleMixedTrial()
 
-  validatedPourcentageSingleMixedTrial : ->
-    verif = Math.round(@pourcentageSingleMixedTrial/100*@n/@qteStimuli)*@qteStimuli
-    unless verif/@n*100 == @pourcentageSingleMixedTrial
-      console.log "#{@pourcentageSingleMixedTrial}% d'essais simple mixte n'est pas valide. Modifiez pourcentage le plus proche valide : #{verif/@n*100}%"
-      @pourcentageSingleMixedTrial = verif/@n*100
+  validatedPourcentageSingleMixedTrial: (nbrsOfStimulus)->
+    verif = Math.round(@pourcentageSingleMixedTrial/@trials.length/100*@n/nbrsOfStimulus)*nbrsOfStimulus
+    unless verif/@n*100*@trials.length == @pourcentageSingleMixedTrial
+      console.log "#{@pourcentageSingleMixedTrial}% d'essais simple mixte n'est pas valide. Modifiez pourcentage le plus proche valide : #{verif/@n*100*@trials.length}%"
+      @pourcentageSingleMixedTrial = verif/@n*100*@trials.length
     verif
 
 class BlockView
@@ -200,8 +203,8 @@ block1 = new Block(
     new Instruction("Explication 1", 'click'),
     new Instruction("Explication 2", 'click')
   ],
-  8,
-  50,
+  24,
+  40,
   3000,
   new Trial(
     new Stimulus('square', 'a'),
@@ -224,7 +227,7 @@ block2 = new Block(
     new Instruction("Explication 3", 'click'),
     new Instruction("Explication 4", 'click')
   ],
-  4,
+  8,
   25,
   'unlimited',
   new Trial(
