@@ -20,7 +20,7 @@ class InstructionView
       , @instruction.timeout       
 
 class Stimulus
-  constructor: (@type, key) ->
+  constructor: (@type = "", key =  '') ->
     @key = key.toUpperCase()
 
 class StimulusView
@@ -55,15 +55,16 @@ class AttemptView
     @elem.html(view.elem)
     @attempt.startedOn = Date.now()
 
-    $(window).on 'keydown', (event) =>
-      key = String.fromCharCode(event.which)
-      if key in @attempt.totalKeys
-        unless @attempt.completed()
-          @attempt.answer(key)
-          if @attempt.success
-            @elem.html('Success')
-          else
-            @elem.html('BOOOHHH!')
+    unless @attempt.stimulus.key == ''
+      $(window).on 'keydown', (event) =>
+        key = String.fromCharCode(event.which)
+        if key in @attempt.totalKeys
+          unless @attempt.completed()
+            @attempt.answer(key)
+            if @attempt.success
+              @elem.html('Success')
+            else
+              @elem.html('BOOOHHH!')
 
 class Trial
   constructor: (@stimuli...) ->
@@ -86,7 +87,9 @@ class Block
       qteSingleMixedTrial = @validatedPourcentageSingleMixedTrial(trial.stimuli.length, @trials.length)
       for n in [0...(@n/trial.stimuli.length)] 
         for o in [0...trial.stimuli.length]
-          unless lastSingleMixedTrialMarker<=currTrial<(lastSingleMixedTrialMarker+qteSingleMixedTrial) || currTrial>= @n
+          if lastSingleMixedTrialMarker<=currTrial<(lastSingleMixedTrialMarker+qteSingleMixedTrial) 
+            @attempt_collection[currTrial].push(new Attempt(new Stimulus, {totalKeys: trial.keys, nTotalTrial:@trials.length, qteSingleMixedTrial:qteSingleMixedTrial}))
+          else if (currTrial< @n)
             @attempt_collection[currTrial].push(new Attempt(trial.stimuli[o], {totalKeys: trial.keys, nTotalTrial:@trials.length, qteSingleMixedTrial:qteSingleMixedTrial}))
           currTrial++
       for key in trial.keys
