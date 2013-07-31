@@ -30,8 +30,7 @@ class StimulusView
     @elem = $('<div>').addClass('stimulus').addClass(@stimulus.type)
 
 class Attempt
-  constructor: (@trial) ->
-    @stimulus   = @trial.stimuli[Math.floor(Math.random() * @trial.stimuli.length)]
+  constructor: (@stimulus, @trial, options = {}) ->
     @success    = null
     @response   = null
     @startedOn  = null
@@ -76,20 +75,37 @@ class Block
   constructor: (@instructions, @trials, options = {}) ->
     @id = options['id'] || 'Block'
     @time_limit = options['time_limit'] || 'unlimited'
-    @number_of_attempts = options['number_of_attempts'] || 2
+    @number_of_attempts = options['number_of_attempts'] || 30
+    @pourcentageSingleMixedTrial = (options['pourcentageSingleMixedTrial'] || 50) / 100
     @attempt_collection = []
     @buttons = []
+
+    @build_attempt_collection()
+
+  build_attempt_collection: ->
+    uniq_attempts = @number_of_attempts * @pourcentageSingleMixedTrial
+    raw_attempts_per_trial = uniq_attempts / @trials.length
+    attempts_per_trial = Math.round(raw_attempts_per_trial)
+    number_of_MM_attempts = @number_of_attempts - (attempts_per_trial * @trials.length)
 
     for i in [0...@number_of_attempts]
       @attempt_collection[i] = []
 
-      for trial in @trials
-        @attempt_collection[i].push(new Attempt(trial))
-        
-        for key in trial.keys
-          unless (@buttons.some (button) -> button.key == key)
-            @buttons.push(new Button(key))
+    for trial in @trials
+      attempts_per_MM_stimulus = Math.round(number_of_MM_attempts / trial.stimuli.length)
+      currentStimulus = 0
+      for stimulus in trial.stimuli
+        for j in [0...attempts_per_MM_stimulus]
+          break if currentStimulus >= number_of_MM_attempts
+          @attempt_collection[currentStimulus++].push(new Attempt(stimulus, trial))
 
+    for trial, h in @trials
+      attempts_per_SM_stimulus = Math.round(attempts_per_trial / trial.stimuli.length)
+      for stimulus, j in trial.stimuli
+        limit = number_of_MM_attempts + (j * attempts_per_SM_stimulus) + (h * attempts_per_trial)
+        for i in [limit...limit + attempts_per_SM_stimulus]
+          @attempt_collection[i].push(new Attempt(stimulus, trial))  
+    
 class BlockView
   @loadingIcon = new Instruction("*", 200)
   @lateMessage = new Instruction("Too late!")
@@ -201,31 +217,38 @@ block1 = new Block(
   [
     new Trial(
       new Stimulus('square', 's'),
-      new Stimulus('circle', 'd')
+      new Stimulus('circle', 'd'),
+      new Stimulus('triangle', 'f'),
+      new Stimulus('rectangle', 'e')
+
     ),
     new Trial(
       new Stimulus('sun', 'j'),
-      new Stimulus('moon', 'k')
+      new Stimulus('moon', 'k'),
+      new Stimulus('star', 'p'),
+      new Stimulus('galaxy', 'l')
+
+
     )
   ]
 )
 
-block2 = new Block(
-  [
-    new Instruction("Welcome to the block 2", 2000)
-    # new Instruction("Explication 3", 'click'),
-    # new Instruction("Explication 4", 'click')
-  ],
-  [
-    new Trial(
-      new Stimulus('square', 'j'),
-      new Stimulus('circle', 'k')
-    ),
-    new Trial(
-      new Stimulus('sun', 's'),
-      new Stimulus('moon', 'd')
-    )
-  ]
-)
+# block2 = new Block(
+#   [
+#     new Instruction("Welcome to the block 2", 2000)
+#     # new Instruction("Explication 3", 'click'),
+#     # new Instruction("Explication 4", 'click')
+#   ],
+#   [
+#     new Trial(
+#       new Stimulus('square', 'j'),
+#       new Stimulus('circle', 'k')
+#     ),
+#     new Trial(
+#       new Stimulus('sun', 's'),
+#       new Stimulus('moon', 'd')
+#     )
+#   ]
+# )
 
-new App(block1, block2).next()
+new App(block1).next()
