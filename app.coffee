@@ -101,12 +101,14 @@ class Block
 
     for trial, h in @trials
       attempts_per_SM_stimulus = Math.round(attempts_per_trial / trial.stimuli.length)
-      for stimulus, j in trial.stimuli
-        limit = number_of_MM_attempts + (j * attempts_per_SM_stimulus) + (h * attempts_per_trial)
-        for i in [limit...limit + attempts_per_SM_stimulus]
-          unless @attempt_collection[i]?
-            @attempt_collection[i] = []
-          @attempt_collection[i].push(new Attempt(stimulus, trial))  
+      
+      for stimulus, i in trial.stimuli
+        limit = number_of_MM_attempts + (i * attempts_per_SM_stimulus) + (h * attempts_per_trial)
+        for j in [limit...limit + attempts_per_SM_stimulus]
+          
+          unless @attempt_collection[j]?
+            @attempt_collection[j] = []
+          @attempt_collection[j].push(new Attempt(stimulus, trial))   
 
   consoleAllStimulus: ->
     for attempt, i in @attempt_collection
