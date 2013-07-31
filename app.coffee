@@ -96,8 +96,8 @@ class Block
         @pushAttempts(stimulus, trial, attempts_per_MM_stimulus, i * attempts_per_MM_stimulus, number_of_MM_attempts)
         @pushAttempts(stimulus, trial, attempts_per_SM_stimulus, number_of_MM_attempts + (i * attempts_per_SM_stimulus) + (h * attempts_per_trial), @number_of_attempts)    
   
-  pushAttempts: (@stimulus, @trial, @attemps_per_stimulus, @limit, @maximum)->
-    for j in [@limit...@limit + @attemps_per_stimulus]
+  pushAttempts: (@stimulus, @trial, @attemps_per_stimulus, @minimum, @maximum)->
+    for j in [@minimum...@minimum + @attemps_per_stimulus]
       break if j >= @maximum
       @attempt_collection[j] ?= []
       @attempt_collection[j].push(new Attempt(@stimulus, @trial))
