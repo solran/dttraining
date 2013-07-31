@@ -95,7 +95,10 @@ class Block
       for stimulus, i in trial.stimuli
         @pushAttempts(stimulus, trial, attempts_per_MM_stimulus, i * attempts_per_MM_stimulus, number_of_MM_attempts)
         @pushAttempts(stimulus, trial, attempts_per_SM_stimulus, number_of_MM_attempts + (i * attempts_per_SM_stimulus) + (h * attempts_per_trial), @number_of_attempts)    
-  
+      for key in trial.keys
+        unless (@buttons.some (button) -> button.key == key)
+          @buttons.push(new Button(key))
+
   pushAttempts: (@stimulus, @trial, @attemps_per_stimulus, @minimum, @maximum)->
     for j in [@minimum...@minimum + @attemps_per_stimulus]
       break if j >= @maximum
