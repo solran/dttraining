@@ -81,6 +81,7 @@ class Block
     @buttons = []
 
     @build_attempt_collection()
+    @consoleAllStimulus()
 
   build_attempt_collection: ->
     uniq_attempts = @number_of_attempts * @pourcentageSingleMixedTrial
@@ -105,6 +106,11 @@ class Block
         limit = number_of_MM_attempts + (j * attempts_per_SM_stimulus) + (h * attempts_per_trial)
         for i in [limit...limit + attempts_per_SM_stimulus]
           @attempt_collection[i].push(new Attempt(stimulus, trial))  
+  
+  consoleAllStimulus: ->
+    for attempt, i in @attempt_collection
+      for trial, j in attempt 
+        console.log i, j, trial.stimulus.type
     
 class BlockView
   @loadingIcon = new Instruction("*", 200)
