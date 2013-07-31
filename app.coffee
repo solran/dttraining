@@ -89,23 +89,21 @@ class Block
     attempts_per_trial = Math.round(raw_attempts_per_trial)
     number_of_MM_attempts = @number_of_attempts - (attempts_per_trial * @trials.length)
 
-    for trial in @trials
+    for trial, h in @trials
       attempts_per_MM_stimulus = Math.round(number_of_MM_attempts / trial.stimuli.length)
-      currentStimulus = 0
-      for stimulus in trial.stimuli
-        for j in [0...attempts_per_MM_stimulus]
-          break if currentStimulus >= number_of_MM_attempts
-          unless @attempt_collection[currentStimulus]?
-            @attempt_collection[currentStimulus] = []
-          @attempt_collection[currentStimulus++].push(new Attempt(stimulus, trial))
+      for stimulus, i in trial.stimuli
+        limit = i * attempts_per_MM_stimulus
+        for j in [limit...limit + attempts_per_MM_stimulus]
+          break if j >= number_of_MM_attempts
+          unless @attempt_collection[j]?
+            @attempt_collection[j] = []
+          @attempt_collection[j].push(new Attempt(stimulus, trial))
 
     for trial, h in @trials
       attempts_per_SM_stimulus = Math.round(attempts_per_trial / trial.stimuli.length)
-      
       for stimulus, i in trial.stimuli
         limit = number_of_MM_attempts + (i * attempts_per_SM_stimulus) + (h * attempts_per_trial)
         for j in [limit...limit + attempts_per_SM_stimulus]
-          
           unless @attempt_collection[j]?
             @attempt_collection[j] = []
           @attempt_collection[j].push(new Attempt(stimulus, trial))   
