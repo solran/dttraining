@@ -99,11 +99,11 @@ class Block
         unless (@buttons.some (button) -> button.key == key)
           @buttons.push(new Button(key))
 
-  pushAttempts: (@stimulus, @trial, @attemps_per_stimulus, @minimum, @maximum)->
-    for j in [@minimum...@minimum + @attemps_per_stimulus]
-      break if j >= @maximum
+  pushAttempts: (stimulus, trial, attemps_per_stimulus, minimum, maximum)->
+    for j in [minimum...minimum + attemps_per_stimulus]
+      break if j >= maximum
       @attempt_collection[j] ?= []
-      @attempt_collection[j].push(new Attempt(@stimulus, @trial))
+      @attempt_collection[j].push(new Attempt(stimulus, trial))
 
   consoleAllStimulus: ->
     for attempt, i in @attempt_collection
