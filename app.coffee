@@ -30,7 +30,7 @@ class StimulusView
     @elem = $('<div>').addClass('stimulus').addClass(@stimulus.type)
 
 class Attempt
-  constructor: (@stimulus, @trial, options = {}) ->
+  constructor: (@stimulus, @trial, @trialPlace, @numberOfTrial) ->
     @success    = null
     @response   = null
     @startedOn  = null
@@ -48,8 +48,8 @@ class Attempt
     @answeredOn = Date.now()
 
 class AttemptView
-  constructor: (@attempt) ->
-    @elem = $('<div>').addClass('attempt').css('width', 100 / @attempt.trial.stimuli.length + '%')
+  constructor: (@attempt) ->  
+    @elem = $('<div>').addClass('attempt').css({left : @attempt.trialPlace/ @attempt.numberOfTrial * 100 + '%', width : 100 / @attempt.numberOfTrial + '%'})
     attemptView = new StimulusView(@attempt.stimulus)
     @elem.html(attemptView.elem)
     @attempt.startedOn = Date.now()
@@ -71,7 +71,6 @@ class Trial
     @keys = @stimuli.map (stimulus) -> stimulus.key
 
 class Block
-
   constructor: (@instructions, @trials, options = {}) ->
     @id = options['id'] || 'Block'
     @timeLimit = options['timeLimit'] || 'unlimited'
@@ -93,17 +92,17 @@ class Block
       attemptsPerMMstimulus = Math.round(numberOfMMattempts / trial.stimuli.length)
       attemptsPerSMstimulus = Math.round(attemptsPerTrial / trial.stimuli.length)
       for stimulus, i in trial.stimuli
-        @pushAttempts(stimulus, trial, attemptsPerMMstimulus, i * attemptsPerMMstimulus, numberOfMMattempts)
-        @pushAttempts(stimulus, trial, attemptsPerSMstimulus, numberOfMMattempts + (i * attemptsPerSMstimulus) + (h * attemptsPerTrial), @numberOfAttempts)    
+        @pushAttempts(stimulus, trial, h, attemptsPerMMstimulus, i * attemptsPerMMstimulus, numberOfMMattempts)
+        @pushAttempts(stimulus, trial, h, attemptsPerSMstimulus, numberOfMMattempts + (i * attemptsPerSMstimulus) + (h * attemptsPerTrial), @numberOfAttempts)    
       for key in trial.keys
         unless (@buttons.some (button) -> button.key == key)
           @buttons.push(new Button(key))
 
-  pushAttempts: (stimulus, trial, attempsPerStimulus, minimum, maximum)->
+  pushAttempts: (stimulus, trial, trialPlace, attempsPerStimulus, minimum, maximum)->
     for j in [minimum...minimum + attempsPerStimulus]
       break if j >= maximum
       @attemptCollection[j] ?= []
-      @attemptCollection[j].push(new Attempt(stimulus, trial))
+      @attemptCollection[j].push(new Attempt(stimulus, trial, trialPlace, @trials.length))
 
   consoleAllStimulus: ->
     for attempt, i in @attemptCollection
@@ -222,6 +221,11 @@ block1 = new Block(
     new Trial(
       new Stimulus('square', 's'),
       new Stimulus('circle', 'd'),
+      #new Stimulus('triangle', 'f'),
+      #new Stimulus('rectangle', 'e')
+
+    ),
+    new Trial(
       new Stimulus('triangle', 'f'),
       new Stimulus('rectangle', 'e')
 
@@ -229,12 +233,11 @@ block1 = new Block(
     new Trial(
       new Stimulus('sun', 'j'),
       new Stimulus('moon', 'k'),
-      new Stimulus('star', 'p'),
-      new Stimulus('galaxy', 'l')
-
-
+      #new Stimulus('star', 'p'),
+      #new Stimulus('galaxy', 'l')
     )
   ]
+   {timeLimit : 500}
 )
 
 # block2 = new Block(

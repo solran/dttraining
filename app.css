@@ -16,6 +16,7 @@
 
 .attempt {
   float: left;
+  position:absolute;
   text-align: center;
 }
 
