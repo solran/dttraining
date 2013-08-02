@@ -93,7 +93,7 @@ class Block
       attemptsPerSMstimulus = Math.round(attemptsPerTrial / trial.stimuli.length)
       for stimulus, i in trial.stimuli
         @pushAttempts(stimulus, trial, h, attemptsPerMMstimulus, i * attemptsPerMMstimulus, numberOfMMattempts)
-        @pushAttempts(stimulus, trial, h, attemptsPerSMstimulus, numberOfMMattempts + (i * attemptsPerSMstimulus) + (h * attemptsPerTrial), @numberOfAttempts)    
+        @pushAttempts(stimulus, trial, h, attemptsPerSMstimulus, numberOfMMattempts + (i * attemptsPerSMstimulus) + (h * attemptsPerTrial), numberOfMMattempts + ((h+1) * attemptsPerTrial))    
       for key in trial.keys
         unless (@buttons.some (button) -> button.key == key)
           @buttons.push(new Button(key))
