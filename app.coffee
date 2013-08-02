@@ -50,8 +50,8 @@ class Attempt
 class AttemptView
   constructor: (@attempt) ->
     @elem = $('<div>').addClass('attempt').css('width', 100 / @attempt.trial.stimuli.length + '%')
-    attempt_view = new StimulusView(@attempt.stimulus)
-    @elem.html(attempt_view.elem)
+    attemptView = new StimulusView(@attempt.stimulus)
+    @elem.html(attemptView.elem)
     @attempt.startedOn = Date.now()
 
     $(window).on 'keydown', (event) =>
@@ -74,39 +74,39 @@ class Block
 
   constructor: (@instructions, @trials, options = {}) ->
     @id = options['id'] || 'Block'
-    @time_limit = options['time_limit'] || 'unlimited'
-    @number_of_attempts = options['number_of_attempts'] || 30
+    @timeLimit = options['timeLimit'] || 'unlimited'
+    @numberOfAttempts = options['numberOfAttempts'] || 30
     @pourcentageSingleMixedTrial = (options['pourcentageSingleMixedTrial'] || 50) / 100
-    @attempt_collection = []
+    @attemptCollection = []
     @buttons = []
 
-    @build_attempt_collection()
+    @buildAttemptCollection()
     @consoleAllStimulus()
 
-  build_attempt_collection: ->
-    uniq_attempts = @number_of_attempts * @pourcentageSingleMixedTrial
-    raw_attempts_per_trial = uniq_attempts / @trials.length
-    attempts_per_trial = Math.round(raw_attempts_per_trial)
-    number_of_MM_attempts = @number_of_attempts - (attempts_per_trial * @trials.length)
+  buildAttemptCollection: ->
+    uniqAttempts = @numberOfAttempts * @pourcentageSingleMixedTrial
+    rawAttemptsPerTrial = uniqAttempts / @trials.length
+    attemptsPerTrial = Math.round(rawAttemptsPerTrial)
+    numberOfMMattempts = @numberOfAttempts - (attemptsPerTrial * @trials.length)
 
     for trial, h in @trials
-      attempts_per_MM_stimulus = Math.round(number_of_MM_attempts / trial.stimuli.length)
-      attempts_per_SM_stimulus = Math.round(attempts_per_trial / trial.stimuli.length)
+      attemptsPerMMstimulus = Math.round(numberOfMMattempts / trial.stimuli.length)
+      attemptsPerSMstimulus = Math.round(attemptsPerTrial / trial.stimuli.length)
       for stimulus, i in trial.stimuli
-        @pushAttempts(stimulus, trial, attempts_per_MM_stimulus, i * attempts_per_MM_stimulus, number_of_MM_attempts)
-        @pushAttempts(stimulus, trial, attempts_per_SM_stimulus, number_of_MM_attempts + (i * attempts_per_SM_stimulus) + (h * attempts_per_trial), @number_of_attempts)    
+        @pushAttempts(stimulus, trial, attemptsPerMMstimulus, i * attemptsPerMMstimulus, numberOfMMattempts)
+        @pushAttempts(stimulus, trial, attemptsPerSMstimulus, numberOfMMattempts + (i * attemptsPerSMstimulus) + (h * attemptsPerTrial), @numberOfAttempts)    
       for key in trial.keys
         unless (@buttons.some (button) -> button.key == key)
           @buttons.push(new Button(key))
 
-  pushAttempts: (stimulus, trial, attemps_per_stimulus, minimum, maximum)->
-    for j in [minimum...minimum + attemps_per_stimulus]
+  pushAttempts: (stimulus, trial, attempsPerStimulus, minimum, maximum)->
+    for j in [minimum...minimum + attempsPerStimulus]
       break if j >= maximum
-      @attempt_collection[j] ?= []
-      @attempt_collection[j].push(new Attempt(stimulus, trial))
+      @attemptCollection[j] ?= []
+      @attemptCollection[j].push(new Attempt(stimulus, trial))
 
   consoleAllStimulus: ->
-    for attempt, i in @attempt_collection
+    for attempt, i in @attemptCollection
       for trial, j in attempt 
         console.log i, j, trial.stimulus.type
     
@@ -117,23 +117,23 @@ class BlockView
   
   constructor: (@block) ->
     @elem = $('<div>').addClass('block')
-    @current_block = 0
-    @current_instruction = 0
+    @currentBlock = 0
+    @currentInstruction = 0
     
     @start()
 
   completed: ->
-    #console.log @block.attempt_collection[@current_block]
-    for attempt in @block.attempt_collection[@current_block]
+    #console.log @block.attemptCollection[@currentBlock]
+    for attempt in @block.attemptCollection[@currentBlock]
       return false unless attempt.completed()
 
     true
 
   start: =>    
-    if @current_instruction < @block.instructions.length
-      view = new InstructionView(@block.instructions[@current_instruction])
+    if @currentInstruction < @block.instructions.length
+      view = new InstructionView(@block.instructions[@currentInstruction])
       $(view).on "instruction.completed", @start
-      @current_instruction++
+      @currentInstruction++
       @elem.html(view.elem)
     else
       @next()
@@ -142,7 +142,7 @@ class BlockView
   next: =>
     $(window).off 'keydown'
     
-    if @current_block < @block.number_of_attempts
+    if @currentBlock < @block.numberOfAttempts
       view = new InstructionView(BlockView.loadingIcon)
       $(view).on 'instruction.completed', (event) =>
         @addButtons()
@@ -155,14 +155,14 @@ class BlockView
   show: =>
     $(window).off 'click'
     
-    if @block.time_limit == 'unlimited'
+    if @block.timeLimit == 'unlimited'
       @clickOn()
-    else if @block.time_limit > 0
+    else if @block.timeLimit > 0
       @timerOn()
     
     @elem.html('')
     
-    for attempt in @block.attempt_collection[@current_block]
+    for attempt in @block.attemptCollection[@currentBlock]
       view = new AttemptView(attempt)
       @elem.append(view.elem)
 
@@ -175,7 +175,7 @@ class BlockView
   clickOn: =>
     $(window).on 'click', (event) =>
       if @completed()
-        @current_block++
+        @currentBlock++
         @next()
 
   timerOn: => 
@@ -188,24 +188,24 @@ class BlockView
       @elem.html(view.elem)
       
       $(view).on 'instruction.completed', (event) =>
-        @current_block++
+        @currentBlock++
         @next()
-    , @block.time_limit    
+    , @block.timeLimit    
 
 class App
   constructor: (@blocks...) ->
-    @current_block = 0
+    @currentBlock = 0
 
   next: ->
-    if block = @blocks[@current_block]
-      block_view = new BlockView(block)
-      $("body").html(block_view.elem)
-      $(block_view).on "block.completed", @switch
+    if block = @blocks[@currentBlock]
+      blockView = new BlockView(block)
+      $("body").html(blockView.elem)
+      $(blockView).on "block.completed", @switch
     else
       console.log "app.completed"
 
   switch: =>
-    @current_block++
+    @currentBlock++
     @next()
 
 
