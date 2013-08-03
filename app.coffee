@@ -1,14 +1,14 @@
-class Button
+window.Button = class Button
   constructor:(@key) ->
 
-class ButtonView
+window.ButtonView = class ButtonView
   constructor: (@button, @options) ->
     @elem = $('<div>').addClass('button').addClass(button.key).html(button.key).css(@options)
 
-class Instruction
+window.Instruction = class Instruction
   constructor: (@text, @timeout = 1000) ->
 
-class InstructionView
+window.InstructionView = class InstructionView
   constructor: (@instruction) ->
     @elem = $('<div>').addClass('instruction').html(@instruction.text)
     
@@ -21,15 +21,15 @@ class InstructionView
         $(@).trigger "instruction.completed"
       , @instruction.timeout       
 
-class Stimulus
+window.Stimulus = class Stimulus
   constructor: (@type, key) ->
     @key = key.toUpperCase()
 
-class StimulusView
+window.StimulusView = class StimulusView
   constructor: (@stimulus) ->
     @elem = $('<div>').addClass('stimulus').addClass(@stimulus.type)
 
-class Attempt
+window.Attempt = class Attempt
   constructor: (@stimulus, @trial, options = {}) ->
     @success    = null
     @response   = null
@@ -47,7 +47,7 @@ class Attempt
     @success    = @stimulus.key == key
     @answeredOn = Date.now()
 
-class AttemptView
+window.AttemptView = class AttemptView
   constructor: (@attempt) ->
     @elem = $('<div>').addClass('attempt').css('width', 100 / @attempt.trial.stimuli.length + '%')
     attempt_view = new StimulusView(@attempt.stimulus)
@@ -66,11 +66,11 @@ class AttemptView
           else
             @elem.html('BOOOHHH!')
 
-class Trial
+window.Trial = class Trial
   constructor: (@stimuli...) ->
     @keys = @stimuli.map (stimulus) -> stimulus.key
 
-class Block
+window.Block = class Block
 
   constructor: (@instructions, @trials, options = {}) ->
     @id = options['id'] || 'Block'
@@ -110,7 +110,7 @@ class Block
       for trial, j in attempt 
         console.log i, j, trial.stimulus.type
     
-class BlockView
+window.BlockView = class BlockView
   @loadingIcon = new Instruction("*", 200)
   @lateMessage = new Instruction("Too late!")
   @inTimeMessage = new Instruction("In Time!")
@@ -137,7 +137,6 @@ class BlockView
       @elem.html(view.elem)
     else
       @next()
-
 
   next: =>
     $(window).off 'keydown'
@@ -192,7 +191,7 @@ class BlockView
         @next()
     , @block.time_limit    
 
-class App
+window.App = class App
   constructor: (@blocks...) ->
     @current_block = 0
 
@@ -207,52 +206,3 @@ class App
   switch: =>
     @current_block++
     @next()
-
-
-
-# program configuration
-
-block1 = new Block(
-  [
-    new Instruction("Welcome to the block 1", 2000)
-    # new Instruction("Explication 1", 'click'),
-    # new Instruction("Explication 2", 'click')
-  ],
-  [
-    new Trial(
-      new Stimulus('square', 's'),
-      new Stimulus('circle', 'd'),
-      new Stimulus('triangle', 'f'),
-      new Stimulus('rectangle', 'e')
-
-    ),
-    new Trial(
-      new Stimulus('sun', 'j'),
-      new Stimulus('moon', 'k'),
-      new Stimulus('star', 'p'),
-      new Stimulus('galaxy', 'l')
-
-
-    )
-  ]
-)
-
-# block2 = new Block(
-#   [
-#     new Instruction("Welcome to the block 2", 2000)
-#     # new Instruction("Explication 3", 'click'),
-#     # new Instruction("Explication 4", 'click')
-#   ],
-#   [
-#     new Trial(
-#       new Stimulus('square', 'j'),
-#       new Stimulus('circle', 'k')
-#     ),
-#     new Trial(
-#       new Stimulus('sun', 's'),
-#       new Stimulus('moon', 'd')
-#     )
-#   ]
-# )
-
-new App(block1).next()

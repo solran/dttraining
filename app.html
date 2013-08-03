@@ -11,5 +11,43 @@
     <script src="jquery.js"></script>
     <script src="app.js"></script>
 
+    <script>
+
+      block1 = new Block(
+        [
+          new Instruction("Welcome to the block 1", 2000)
+        ],
+        [
+          new Trial(
+            new Stimulus('square', 's'),
+            new Stimulus('circle', 'd')
+          ),
+          new Trial(
+            new Stimulus('sun', 'j'),
+            new Stimulus('moon', 'k')
+          )
+        ]
+      )
+
+      block2 = new Block(
+        [
+          new Instruction("Welcome to the block 2", 2000)
+        ],
+        [
+          new Trial(
+            new Stimulus('square', 'j'),
+            new Stimulus('circle', 'k')
+          ),
+          new Trial(
+            new Stimulus('sun', 's'),
+            new Stimulus('moon', 'd')
+          )
+        ]
+      )
+
+      new App(block1, block2).next()
+
+    </script>
+
   </body>
 </html>
