@@ -83,7 +83,10 @@ class Block
     @timeLimit = options['timeLimit'] || 'unlimited'
     @numberOfAttempts = options['numberOfAttempts'] || 16
     @pourcentageSingleMixedTrial = (options['pourcentageSingleMixedTrial'] || 0) / 100
-    @nBack = (options['nBack'] || -1) 
+    @nBack = options['nBack'] || 0
+    if (@timeLimit == 'unlimited' || @pourcentageSingleMixedTrial != 0) && @nBack != 0 
+        @nBack = 0
+        console.log 'Vous ne pouvez etre en mode n-back si le temps est illimite ou si un % de SM est choisi!' 
     @attemptCollection = []
     @buttons = []
 
@@ -249,8 +252,8 @@ block1 = new Block(
       #new Stimulus('star', 'p'),
       #new Stimulus('galaxy', 'l')
     )
-  ]
-   {timeLimit : 500}
+  ],
+  {timeLimit : 1000, nBack : -1}
 )
 
 # block2 = new Block(
