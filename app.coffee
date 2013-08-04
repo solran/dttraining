@@ -36,6 +36,12 @@ class Attempt
     @startedOn  = null
     @answeredOn = null
 
+  assignKey : (key) ->
+    if key?
+      @key = key.toUpperCase()
+    else
+      @key = ' '
+
   completed: ->
     !!@response
 
@@ -44,7 +50,7 @@ class Attempt
 
   answer: (key) ->
     @response   = key
-    @success    = @stimulus.key == key
+    @success    = @key == key
     @answeredOn = Date.now()
 
 class AttemptView
@@ -74,12 +80,14 @@ class Block
   constructor: (@instructions, @trials, options = {}) ->
     @id = options['id'] || 'Block'
     @timeLimit = options['timeLimit'] || 'unlimited'
-    @numberOfAttempts = options['numberOfAttempts'] || 30
-    @pourcentageSingleMixedTrial = (options['pourcentageSingleMixedTrial'] || 50) / 100
+    @numberOfAttempts = options['numberOfAttempts'] || 16
+    @pourcentageSingleMixedTrial = (options['pourcentageSingleMixedTrial'] || 0) / 100
+    @nBack = (options['nBack'] || -1) 
     @attemptCollection = []
     @buttons = []
 
     @buildAttemptCollection()
+    @doNBack(@nBack)
     @consoleAllStimulus()
 
   buildAttemptCollection: ->
@@ -104,10 +112,15 @@ class Block
       @attemptCollection[j] ?= []
       @attemptCollection[j].push(new Attempt(stimulus, trial, trialPlace, @trials.length))
 
+  doNBack: (nBack)->
+    for attempt, i in @attemptCollection
+      for trial, j in attempt 
+        trial.assignKey(@attemptCollection[i+nBack]?[j].stimulus.key)
+
   consoleAllStimulus: ->
     for attempt, i in @attemptCollection
       for trial, j in attempt 
-        console.log i, j, trial.stimulus.type
+        console.log i, j, trial.stimulus.type, trial.stimulus.key, trial.key
     
 class BlockView
   @loadingIcon = new Instruction("*", 200)
@@ -223,12 +236,6 @@ block1 = new Block(
       new Stimulus('circle', 'd'),
       #new Stimulus('triangle', 'f'),
       #new Stimulus('rectangle', 'e')
-
-    ),
-    new Trial(
-      new Stimulus('triangle', 'f'),
-      new Stimulus('rectangle', 'e')
-
     ),
     new Trial(
       new Stimulus('sun', 'j'),
@@ -237,7 +244,7 @@ block1 = new Block(
       #new Stimulus('galaxy', 'l')
     )
   ]
-   {timeLimit : 500}
+   {timeLimit : 5000}
 )
 
 # block2 = new Block(
