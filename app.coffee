@@ -1,14 +1,14 @@
-class Button
+window.Button = class Button
   constructor:(@key) ->
 
-class ButtonView
+window.ButtonView = class ButtonView
   constructor: (@button, @options) ->
     @elem = $('<div>').addClass('button').addClass(button.key).html(button.key).css(@options)
 
-class Instruction
+window.Instruction = class Instruction
   constructor: (@text, @timeout = 1000) ->
 
-class InstructionView
+window.InstructionView = class InstructionView
   constructor: (@instruction) ->
     @elem = $('<div>').addClass('instruction').html(@instruction.text)
     
@@ -21,15 +21,15 @@ class InstructionView
         $(@).trigger "instruction.completed"
       , @instruction.timeout       
 
-class Stimulus
+window.Stimulus = class Stimulus
   constructor: (@type, key) ->
     @key = key.toUpperCase()
 
-class StimulusView
+window.StimulusView = class StimulusView
   constructor: (@stimulus) ->
     @elem = $('<div>').addClass('stimulus').addClass(@stimulus.type)
 
-class Attempt
+window.Attempt = class Attempt
   constructor: (@stimulus, @trial, @trialPlace, @numberOfTrial) ->
     @success    = null
     @response   = null
@@ -54,7 +54,7 @@ class Attempt
     @success    = @key == key
     @answeredOn = Date.now()
 
-class AttemptView
+window.AttemptView = class AttemptView
   constructor: (@attempt) ->  
     @elem = $('<div>').addClass('attempt').css({left : @attempt.trialPlace/ @attempt.numberOfTrial * 100 + '%', width : 100 / @attempt.numberOfTrial + '%'})
     attemptView = new StimulusView(@attempt.stimulus)
@@ -73,11 +73,11 @@ class AttemptView
           else
             @elem.html('BOOOHHH!')
 
-class Trial
+window.Trial = class Trial
   constructor: (@stimuli...) ->
     @keys = @stimuli.map (stimulus) -> stimulus.key
 
-class Block
+window.Block = class Block
   constructor: (@instructions, @trials, options = {}) ->
     @id = options['id'] || 'Block'
     @timeLimit = options['timeLimit'] || 'unlimited'
@@ -213,7 +213,7 @@ class BlockView
         @next()
     , @block.timeLimit    
 
-class App
+window.App = class App
   constructor: (@blocks...) ->
     @currentBlock = 0
 
