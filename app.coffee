@@ -41,9 +41,10 @@ class Attempt
       @key = key.toUpperCase()
     else
       @key = ' '
+      @response = ' '
 
   completed: ->
-    !!@response
+    !!@response 
 
   reactionTime: ->
     @answeredOn - @startedOn
@@ -126,6 +127,8 @@ class BlockView
   @loadingIcon = new Instruction("*", 200)
   @lateMessage = new Instruction("Too late!")
   @inTimeMessage = new Instruction("In Time!")
+  @nBackIntro = new Instruction("Remember!")
+
   
   constructor: (@block) ->
     @elem = $('<div>').addClass('block')
@@ -138,7 +141,8 @@ class BlockView
     #console.log @block.attemptCollection[@currentBlock]
     for attempt in @block.attemptCollection[@currentBlock]
       return false unless attempt.completed()
-
+    if attempt.key == ' '
+      return 'nbackIntro'
     true
 
   start: =>    
@@ -192,7 +196,9 @@ class BlockView
 
   timerOn: => 
     setTimeout =>
-      view = if @completed()
+      view = if @completed() == 'nbackIntro'
+        new InstructionView(BlockView.nBackIntro)
+      else if @completed()
         new InstructionView(BlockView.inTimeMessage)
       else
         new InstructionView(BlockView.lateMessage)
@@ -244,7 +250,7 @@ block1 = new Block(
       #new Stimulus('galaxy', 'l')
     )
   ]
-   {timeLimit : 5000}
+   {timeLimit : 500}
 )
 
 # block2 = new Block(
